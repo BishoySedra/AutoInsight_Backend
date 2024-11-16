@@ -1,0 +1,35 @@
+import * as authService from "../services/auth.js";
+
+export const signUpUser = async (req, res, next) => {
+    try {
+        const userData = req.body;
+        const newUser = await authService.signUpUser(userData, req);
+
+        return res.status(201).json({
+            message: "User signed up successfully, please check your email to verify your account",
+            body: newUser ? newUser : null,
+            status: 201,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const loginUser = async (req, res, next) => {
+    try {
+        const userData = req.body;
+        const { token, userId } = await authService.loginUser(userData);
+
+        return res.status(200).json({
+            message: "User logged in successfully",
+            body: {
+                "access_token": token,
+                userId
+            },
+            status: 200,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
