@@ -1,35 +1,22 @@
 import * as authService from "../services/auth.js";
+import { wrapper } from "../utils/wrapper.js";
+import { sendResponse } from "../utils/response.js";
 
 export const signUpUser = async (req, res, next) => {
-    try {
+    wrapper(async (req, res, next) => {
         const userData = req.body;
-        const newUser = await authService.signUpUser(userData, req);
+        const user = await authService.signUpUser(userData);
 
-        return res.status(201).json({
-            message: "User signed up successfully, please check your email to verify your account",
-            body: newUser ? newUser : null,
-            status: 201,
-        });
-    } catch (error) {
-        next(error);
-    }
+        return sendResponse(res, user, "User signed up successfully", 201);
+    })(req, res, next);
 };
 
 export const loginUser = async (req, res, next) => {
-    try {
+    wrapper(async (req, res, next) => {
         const userData = req.body;
-        const { token, userId } = await authService.loginUser(userData);
+        const user = await authService.loginUser(userData);
 
-        return res.status(200).json({
-            message: "User logged in successfully",
-            body: {
-                "access_token": token,
-                userId
-            },
-            status: 200,
-        });
-    } catch (error) {
-        next(error);
-    }
+        return sendResponse(res, user, "User logged in successfully", 200);
+    })(req, res, next);
 };
 

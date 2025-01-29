@@ -1,5 +1,4 @@
 import multer from 'multer';
-import path from 'path';
 
 const MAX_SIZE = 50 * 1024 * 1024; // 50 MB in bytes
 
@@ -21,22 +20,14 @@ const fileFilter = (req, file, cb) => {
         'image/tiff',
         'image/svg+xml',
 
-        // Video MIME types
-        'video/mp4',
-        'video/mpeg',
-        'video/webm',
-        'video/ogg',
-        'video/3gpp',
-        'video/3gpp2',
-
-        // Document MIME types
-        'application/pdf',
+        // CSV File MIME types
+        'text/csv'
     ];
 
     if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);  // Accept the file
     } else {
-        cb(new Error('Invalid file type. Only images, videos, and PDFs are allowed.'), false);  // Reject the file
+        cb(new Error('Invalid file type. Only images, CSV files are allowed.'), false);  // Reject the file
     }
 };
 

@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
+    ports:
+      - "27017:27017" # Expose MongoDB on localhost
+    volumes:
+      - mongodb_data:/data/db # Persist MongoDB data
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: Bishoy123
+      MONGO_INITDB_ROOT_PASSWORD: Bishoy123
+      MONGO_INITDB_DATABASE: AutoInsight # Set the database where root user will be created
+volumes:
+  mongodb_data:

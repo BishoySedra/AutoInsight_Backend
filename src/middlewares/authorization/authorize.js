@@ -1,5 +1,5 @@
-import { verifyAccessToken } from "../utils/jwt.js";
-import { createCustomError } from "./errors/customError.js";
+import { verifyAccessToken } from "../../utils/jwt.js";
+import { createCustomError } from "../errors/customError.js";
 
 const authorize = async (req, res, next) => {
     try {
