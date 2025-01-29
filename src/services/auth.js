@@ -46,7 +46,7 @@ export const loginUser = async (userData) => {
     });
 
     if (!foundUser) {
-        throw createCustomError("User does not exist", 400);
+        throw createCustomError("Invalid credentials", 400);
     }
 
     // check if the password is correct
