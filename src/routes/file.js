@@ -1,9 +1,12 @@
 import { Router } from 'express';
-import * as uploadController from '../controllers/file.js';
+import uploadfile from '../middlewares/upload/file.js';
+import { sendResponse } from '../utils/response.js';
 
 const router = Router();
 
 // route to upload a file
-router.post('/upload', uploadController.uploadFile);
+router.post('/upload', uploadfile, (req, res) => {
+    sendResponse(res, { url: req.file_url }, 'Uploaded!', 200);
+});
 
 export default router;
