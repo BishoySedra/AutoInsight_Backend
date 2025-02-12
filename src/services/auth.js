@@ -3,9 +3,9 @@ import { createCustomError } from "../middlewares/errors/customError.js";
 import * as hashingOperations from "../utils/bcrypt.js";
 import * as tokenOperations from "../utils/jwt.js";
 
-export const signUpUser = async (userData, req) => {
+export const signUpUser = async (userData) => {
     // destructuring the userData object
-    const { username, email, password } = userData;
+    const { username, email, password, confirm_password } = userData;
 
     // check if the email already exists
     const foundUser = await User.findOne({
@@ -16,20 +16,19 @@ export const signUpUser = async (userData, req) => {
         throw createCustomError("User already exists", 400, null);
     }
 
+    // check if the password and confirm password match
+    if (password !== confirm_password) {
+        throw createCustomError("Passwords do not match", 400, null);
+    }
+
     // hash the password
     const hashedPassword = await hashingOperations.hashPassword(password);
-
-    // create one-use token and should immediately get revoked after use
-    const emailVerificationToken = tokenOperations.generateToken({
-        email,
-    });
 
     // create a new user
     const newUser = new User({
         username,
         email,
         password: hashedPassword,
-        emailVerificationToken
     });
 
     // save the user to the database
@@ -57,11 +56,6 @@ export const loginUser = async (userData) => {
 
     if (!isPasswordCorrect) {
         throw createCustomError("Invalid credentials", 400);
-    }
-
-    // check if the email is verified
-    if (!foundUser.emailVerified) {
-        throw createCustomError("Email not verified", 400);
     }
 
     // generate a token

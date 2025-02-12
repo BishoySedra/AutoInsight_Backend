@@ -1,7 +1,7 @@
 import upload from "../utils/multer.js";
 import cloudinary from "../utils/cloudinary.js";
 
-export const uploadFile = (req, res, next) => {
+export const uploadFile = (req, res) => {
     upload.single("file")(req, res, (err) => {
 
         if (err) {

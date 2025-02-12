@@ -31,10 +31,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  emailVerified: {
-    type: Boolean,
-    default: true,
-  },
+  profile_picture: {
+    type: String,
+    default: null,
+  }
 });
 
 // Create a model for the user schema
