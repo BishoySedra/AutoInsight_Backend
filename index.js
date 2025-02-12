@@ -10,6 +10,7 @@ import authRouter from "./src/routes/auth.js";
 import fileRouter from "./src/routes/file.js";
 import reviewRouter from "./src/routes/review.js";
 import userRouter from "./src/routes/user.js";
+import datasetRouter from "./src/routes/dataset.js";
 import errorHandler from "./src/middlewares/errors/errorHandler.js";
 import notFoundHandler from "./src/middlewares/errors/notFoundHandler.js";
 
@@ -43,6 +44,7 @@ app.use(`${baseUrl}/auth`, authRouter);
 app.use(`${baseUrl}/files`, fileRouter);
 app.use(`${baseUrl}/reviews`, reviewRouter);
 app.use(`${baseUrl}/users`, userRouter);
+app.use(`${baseUrl}/datasets`, datasetRouter);
 
 app.use(errorHandler);
 app.use(notFoundHandler);

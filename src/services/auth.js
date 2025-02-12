@@ -8,12 +8,22 @@ export const signUpUser = async (userData) => {
     const { username, email, password, confirm_password } = userData;
 
     // check if the email already exists
-    const foundUser = await User.findOne({
-        email,
+    let foundUser = await User.findOne({
+        username
     });
 
+    // if the username already taken, throw an error
     if (foundUser) {
-        throw createCustomError("User already exists", 400, null);
+        throw createCustomError("Username already taken", 400, null);
+    }
+
+    foundUser = await User.findOne({
+        email
+    });
+
+    // if the email already taken, throw an error
+    if (foundUser) {
+        throw createCustomError("Email already taken", 400, null);
     }
 
     // check if the password and confirm password match

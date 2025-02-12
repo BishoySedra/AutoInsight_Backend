@@ -1,8 +1,5 @@
 import User from "../DB/models/user.js";
 import dotenv from "dotenv";
-import axios from "axios";
-import FormData from "form-data";
-import fs from "fs";
 import { createCustomError } from "../middlewares/errors/customError.js";
 
 dotenv.config();

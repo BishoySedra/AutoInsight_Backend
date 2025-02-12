@@ -12,6 +12,11 @@ const DatasetSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        dataset_url: {
+            type: String,
+            required: true,
+            trim: true,
+        },
         permissions: [
             {
                 type: mongoose.Schema.Types.ObjectId,
