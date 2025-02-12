@@ -18,3 +18,19 @@ export const updateProfilePicture = async (req, res, next) => {
 
     })(req, res, next);
 };
+
+// Controller to get user id by username or email
+export const getUserId = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+
+        // getting username or email from request
+        const { username, email } = req.query;
+
+        // getting user id by username or email
+        const user_id = await userService.getUserId(username, email);
+
+        // sending response to client
+        sendResponse(res, user_id, "User id fetched successfully", 200);
+
+    })(req, res, next);
+};

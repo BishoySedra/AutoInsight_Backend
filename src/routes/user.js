@@ -8,4 +8,7 @@ const router = Router();
 // endpoint to update profile picture
 router.put("/profile-picture", authorize, uploadFile, userController.updateProfilePicture);
 
+// endpoint to get user id by username or email
+router.get("/user-id", userController.getUserId);
+
 export default router;

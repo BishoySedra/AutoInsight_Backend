@@ -21,3 +21,20 @@ export const updateProfilePicture = async (user_id, profilePictureURL) => {
 
     await user.save();
 }
+
+// Service to get user id by username or email
+export const getUserId = async (username, email) => {
+    // Check if username or email is provided
+    if (!username && !email) {
+        throw createCustomError(`Username or email is required`, 400);
+    }
+
+    // Check if user exists
+    const user = await User.findOne({ $or: [{ username: username }, { email: email }] });
+
+    if (!user) {
+        throw createCustomError(`User not found`, 404);
+    }
+
+    return user._id;
+}
