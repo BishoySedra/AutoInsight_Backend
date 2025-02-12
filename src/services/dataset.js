@@ -1,4 +1,5 @@
 import Dataset from "../DB/models/dataset.js";
+import { createCustomError } from "../middlewares/errors/customError.js";
 
 // Service to add a new dataset
 export const upload = async (user_id, datasetData, datasetURL) => {
@@ -9,4 +10,74 @@ export const upload = async (user_id, datasetData, datasetURL) => {
     });
     await dataset.save();
     return dataset;
+};
+
+// Service to give permission to a user to access a dataset
+export const share = async (dataset_id, user_id) => {
+
+    // check if the dataset_id is valid
+    const dataset = await Dataset.findOne({ _id: dataset_id });
+
+    // check if the dataset exists
+    if (!dataset) {
+        throw createCustomError(`Dataset not found`, 404);
+    }
+
+    // check if the user_id is already the owner of the dataset
+    if (dataset.user_id.toString() === user_id) {
+        throw createCustomError(`You are already the owner of the dataset`, 400);
+    }
+
+    // check if the user_id is already in the permissions list
+    if (dataset.permissions.includes(user_id)) {
+        throw createCustomError(`User already has access to the dataset`, 400);
+    }
+
+    // check if the user_id is already in the permissions list
+    dataset.permissions.push(user_id);
+
+    // save the updated dataset
+    await dataset.save();
+};
+
+// Service to delete permission of a user to access a dataset
+export const unshare = async (dataset_id, user_id) => {
+
+    // check if the dataset_id is valid
+    const dataset = await Dataset.findOne({ _id: dataset_id });
+
+    // check if the dataset exists
+    if (!dataset) {
+        throw createCustomError(`Dataset not found`, 404);
+    }
+
+    // check if the user_id is already the owner of the dataset
+    if (dataset.user_id.toString() === user_id) {
+        throw createCustomError(`You are the owner of the dataset`, 400);
+    }
+
+    // check if the user_id is already in the permissions list
+    if (!dataset.permissions.includes(user_id)) {
+        throw createCustomError(`User does not have access to the dataset`, 400);
+    }
+
+    // remove the user_id from the permissions list
+    dataset.permissions = dataset.permissions.filter(permission => permission.toString() !== user_id);
+
+    // save the updated dataset
+    await dataset.save();
+};
+
+// Service to read permissions of a dataset
+export const readPermissions = async (dataset_id) => {
+
+    // check if the dataset_id is valid
+    const dataset = await Dataset.findOne({ _id: dataset_id });
+
+    // check if the dataset exists
+    if (!dataset) {
+        throw createCustomError(`Dataset not found`, 404);
+    }
+
+    return dataset.permissions;
 };
