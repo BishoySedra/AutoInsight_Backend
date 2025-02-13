@@ -16,3 +16,50 @@ export const addReview = async (user_id, reviewData) => {
     const review = new Review({ user_id, rating, description });
     return await review.save();
 };
+
+// Service to get all reviews using pagination
+export const getAllReviews = async (page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+    return await Review.find().skip(skip).limit(limit);
+};
+
+// Service to get a review by ID
+export const getReviewById = async (id) => {
+    const review = await Review.findById(id);
+
+    if (!review) {
+        throw createCustomError("No review found with this ID", 404);
+    }
+
+    return review;
+};
+
+// Service to update a review by ID
+export const updateReviewById = async (id, reviewData) => {
+    const { rating, description } = reviewData;
+
+    if (!rating) {
+        throw createCustomError("Rating is required", 400);
+    }
+
+    if (rating < 1 || rating > 5) {
+        throw createCustomError("Rating must be between 1 and 5", 400);
+    }
+
+    const review = await Review.findByIdAndUpdate(id, reviewData, { new: true });
+
+    if (!review) {
+        throw createCustomError("No review found with this ID", 404);
+    }
+
+    return review;
+};
+
+// Service to delete a review by ID
+export const deleteReviewById = async (id) => {
+    const review = await Review.findByIdAndDelete(id);
+
+    if (!review) {
+        throw createCustomError("No review found with this ID", 404);
+    }
+};
