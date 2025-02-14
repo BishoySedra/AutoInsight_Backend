@@ -11,4 +11,8 @@ router.put("/profile-picture", authorize, uploadFile, userController.updateProfi
 // endpoint to get user id by username or email
 router.get("/user-id", userController.getUserId);
 
+
+// endpoint to return user data
+router.get("/user-data", userController.getUserDetails);
+
 export default router;
