@@ -34,3 +34,11 @@ export const getUserId = async (req, res, next) => {
 
     })(req, res, next);
 };
+
+export const getUserDetails = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const id = req.user.id;
+        const data = await getUserData(id);        
+        sendResponse(res, data, 'user details fetched successfully', 200); 
+    })(req, res, next);
+}
