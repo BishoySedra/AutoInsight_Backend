@@ -39,11 +39,11 @@ export const getUserId = async (username, email) => {
     return user._id;
 }
 
-export const getUserData = async (userId) => {    
-        const user = await User.findById(userId).select("-password"); 
-        if (!user) {
-            throw createCustomError(`User not found`, 404);
-        }
-        res.status(200).json({ user });
+export const getUserData = async (userId) => {
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+        throw createCustomError(`User not found`, 404);
+    }
+    return user;
 };
 

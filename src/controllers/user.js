@@ -38,7 +38,7 @@ export const getUserId = async (req, res, next) => {
 export const getUserDetails = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const id = req.userId;
-        const data = await getUserData(id);        
-        sendResponse(res, data, 'user details fetched successfully', 200); 
+        const data = await userService.getUserData(id);
+        sendResponse(res, data, 'user details fetched successfully', 200);
     })(req, res, next);
 }
