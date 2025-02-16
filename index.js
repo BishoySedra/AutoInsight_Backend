@@ -11,6 +11,7 @@ import fileRouter from "./src/routes/file.js";
 import reviewRouter from "./src/routes/review.js";
 import userRouter from "./src/routes/user.js";
 import datasetRouter from "./src/routes/dataset.js";
+import chatbotRouter from "./src/routes/chatbot.js";
 import errorHandler from "./src/middlewares/errors/errorHandler.js";
 import notFoundHandler from "./src/middlewares/errors/notFoundHandler.js";
 
@@ -45,6 +46,7 @@ app.use(`${baseUrl}/files`, fileRouter);
 app.use(`${baseUrl}/reviews`, reviewRouter);
 app.use(`${baseUrl}/users`, userRouter);
 app.use(`${baseUrl}/datasets`, datasetRouter);
+app.use(`${baseUrl}/chatbot`, chatbotRouter);
 
 app.use(errorHandler);
 app.use(notFoundHandler);
