@@ -8,7 +8,7 @@ const router = Router();
 router.post("/", authorize, reviewController.addReview);
 
 // endpoint to get all reviews using pagination
-router.get("/", authorize, reviewController.getAllReviews);
+router.get("/", reviewController.getAllReviews);
 
 // endpoint to get a review by ID
 router.get("/:id", authorize, reviewController.getReviewById);

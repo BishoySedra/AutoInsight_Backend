@@ -1,4 +1,5 @@
 import Review from "../DB/models/review.js";
+import User from "../DB/models/user.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
 
 // Service to add a review
@@ -20,7 +21,16 @@ export const addReview = async (user_id, reviewData) => {
 // Service to get all reviews using pagination
 export const getAllReviews = async (page = 1, limit = 10) => {
     const skip = (page - 1) * limit;
-    return await Review.find().skip(skip).limit(limit);
+    const reviews = await Review.find().skip(skip).limit(limit).select("-__v");
+
+    // Populate the user details
+    const reviewsWithUser = await Promise.all(reviews.map(async (review) => {
+        const user = await User.findById(review.user_id).select("-password -__v");
+        return { ...review._doc, user };
+    }));
+
+    console.log(reviewsWithUser);
+    return reviewsWithUser;
 };
 
 // Service to get a review by ID
@@ -31,7 +41,17 @@ export const getReviewById = async (id) => {
         throw createCustomError("No review found with this ID", 404);
     }
 
-    return review;
+    // console.log(review.user_id);
+
+    // Populate the user details
+    const user = await User.findById(review.user_id).select("-password -__v");
+
+    // console.log(user);
+
+    // add user details to the review object
+    const reviewWithUser = { ...review._doc, user };
+
+    return reviewWithUser;
 };
 
 // Service to update a review by ID
