@@ -8,6 +8,15 @@ const router = Router();
 // endpoint to add a new dataset
 router.post("/upload", authorize, uploadFile, datasetController.upload);
 
+// endpoint to read all datasets
+router.get("/", authorize, datasetController.readAll);
+
+// endpoint to read a dataset by id
+router.get("/:dataset_id", authorize, datasetController.readById);
+
+// endpoint to delete a dataset by id
+router.delete("/:dataset_id", authorize, datasetController.deleteDataset);
+
 // endpoint to add permission to a user to access a dataset
 router.post("/:dataset_id/share", authorize, datasetController.share);
 

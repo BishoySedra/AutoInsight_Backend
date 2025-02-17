@@ -12,6 +12,40 @@ export const upload = async (user_id, datasetData, datasetURL) => {
     return dataset;
 };
 
+// Service to read all datasets
+export const readAll = async (user_id) => {
+    const datasets = await Dataset.find({ user_id });
+    return datasets;
+};
+
+// Service to read a dataset by id
+export const readById = async (dataset_id) => {
+
+    const dataset = await Dataset.findOne({ _id: dataset_id });
+
+    if (!dataset) {
+        throw createCustomError(`Dataset not found`, 404);
+    }
+
+    return dataset;
+};
+
+// Service to delete a dataset by id
+export const deleteDataset = async (dataset_id, user_id) => {
+
+    const dataset = await Dataset.findOne({ _id: dataset_id });
+
+    if (!dataset) {
+        throw createCustomError(`Dataset not found`, 404);
+    }
+
+    if (dataset.user_id.toString() !== user_id) {
+        throw createCustomError(`You are not the owner of the dataset`, 400);
+    }
+
+    await dataset.deleteOne();
+};
+
 // Service to give permission to a user to access a dataset
 export const share = async (dataset_id, user_id) => {
 

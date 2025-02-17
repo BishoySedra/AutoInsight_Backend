@@ -13,6 +13,34 @@ export const upload = async (req, res, next) => {
     })(req, res, next);
 }
 
+// Controller to read all datasets
+export const readAll = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const user_id = req.userId;
+        const datasets = await datasetService.readAll(user_id);
+        return sendResponse(res, datasets, "Datasets read successfully", 200);
+    })(req, res, next);
+}
+
+// Controller to read a dataset by id
+export const readById = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const { dataset_id } = req.params;
+        const dataset = await datasetService.readById(dataset_id);
+        return sendResponse(res, dataset, "Dataset read successfully", 200);
+    })(req, res, next);
+}
+
+// Controller to delete a dataset by id
+export const deleteDataset = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const user_id = req.userId;
+        const { dataset_id } = req.params;
+        await datasetService.deleteDataset(dataset_id, user_id);
+        return sendResponse(res, null, "Dataset deleted successfully", 200);
+    })(req, res, next);
+}
+
 // Controller to give permission to a user to access a dataset
 export const share = async (req, res, next) => {
     wrapper(async (req, res, next) => {
