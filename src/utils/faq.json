@@ -1,0 +1,10 @@
+{
+  "What is AutoInsight?": "AutoInsight is a data analysis tool that allows users to upload CSV files and generate insights using charts and graphs.",
+  "How do I upload a file?": "Click the 'Upload CSV' button, select your file, and press 'Analyze' to start processing.",
+  "How do I view the results?": "After processing, your insights will appear on the dashboard as charts and tables.",
+  "What type of files can I upload?": "Currently, AutoInsight supports CSV files only. Ensure your file has proper headers.",
+  "Can I download the results?": "Yes! Click the 'Export' button to save the results as a CSV file or image.",
+  "How long does the analysis take?": "Most analyses complete within a few seconds, depending on file size.",
+  "Is my data stored permanently?": "No, AutoInsight processes your file temporarily and does not store your data.",
+  "Can I analyze multiple files at once?": "Currently, AutoInsight supports one file at a time. Batch analysis will be available soon!"
+}
