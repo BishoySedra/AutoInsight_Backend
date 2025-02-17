@@ -12,10 +12,28 @@ export const upload = async (user_id, datasetData, datasetURL) => {
     return dataset;
 };
 
-// Service to read all datasets
-export const readAll = async (user_id) => {
-    const datasets = await Dataset.find({ user_id });
-    return datasets;
+// Service to read all datasets with pagination
+export const readAll = async (user_id, limit, page) => {
+
+    // set the limit of datasets per page
+    const limitPerPage = parseInt(limit) || 10;
+
+    // set the page number
+    const pageNumber = parseInt(page) || 1;
+
+    // calculate the number of datasets to skip
+    const skip = (pageNumber - 1) * limitPerPage;
+
+    // get the total number of datasets
+    const totalDatasets = await Dataset.find({ user_id }).countDocuments();
+
+    // get the datasets
+    const datasets = await Dataset.find({ user_id }).skip(skip).limit(limitPerPage);
+
+    return {
+        totalDatasets,
+        datasets
+    };
 };
 
 // Service to read a dataset by id

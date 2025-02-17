@@ -57,71 +57,71 @@ export const chatFn = async (userMessage, sessionId, imageData) => {
     Is my data stored permanently? No, AutoInsight processes your file temporarily and does not store your data.
     Can I analyze multiple files at once? Currently, AutoInsight supports one file at a time. Batch analysis will be available soon!
     `;
-  //   const systemPrompt= `
-  //   You are a support chatbot for AutoInsight. Analyze both text and images related to:
-  //   - CSV data analysis
-  //   - Generated charts/graphs
-  //   - App screenshots
-  //   - Error messages
-  //   For non-app-related content, respond: "I specialize in AutoInsight data analysis."
-    
-  //   When analyzing images:
-  //   1. Describe visual content
-  //   2. Explain technical details
-  //   3. Relate to AutoInsight features
-  //   4. Keep responses under 300 words
-  // `;
-  if (!chats.has(sessionId)) {
-    chats.set(sessionId, {
-      // model: imageData ? 'gemini-pro-vision' : 'gemini-pro',
-      model : 'gemini-1.5-flash',
-      history: [
-        { role: 'user', parts: [{ text: systemPrompt }] },
-        { role: 'model', parts: [{ text: 'Ready to analyze AutoInsight data and visuals.' }] }
-      ]
+    //   const systemPrompt= `
+    //   You are a support chatbot for AutoInsight. Analyze both text and images related to:
+    //   - CSV data analysis
+    //   - Generated charts/graphs
+    //   - App screenshots
+    //   - Error messages
+    //   For non-app-related content, respond: "I specialize in AutoInsight data analysis."
+
+    //   When analyzing images:
+    //   1. Describe visual content
+    //   2. Explain technical details
+    //   3. Relate to AutoInsight features
+    //   4. Keep responses under 300 words
+    // `;
+    if (!chats.has(sessionId)) {
+      chats.set(sessionId, {
+        // model: imageData ? 'gemini-pro-vision' : 'gemini-pro',
+        model: 'gemini-1.5-flash',
+        history: [
+          { role: 'user', parts: [{ text: systemPrompt }] },
+          { role: 'model', parts: [{ text: 'Ready to analyze AutoInsight data and visuals.' }] }
+        ]
+      });
+    }
+    const session = chats.get(sessionId);
+    const model = genAI.getGenerativeModel({ model: session.model });
+    const parts = [];
+
+    // Add image if present
+    if (imageData) {
+      parts.push({
+        inlineData: {
+          mimeType: 'image/jpeg', // or detect from input
+          data: imageData
+        }
+      });
+    }
+
+    // Add text prompt
+    if (userMessage) {
+      parts.push({ text: `${systemPrompt}\n\nUser Query: ${userMessage}` });
+    }
+
+    // Generate response
+    const result = await model.generateContent({
+      contents: [{
+        role: 'user',
+        parts: parts
+      }]
     });
-  }
-  const session = chats.get(sessionId);
-  const model = genAI.getGenerativeModel({ model: session.model });  
-  const parts = [];
-    
-  // Add image if present
-  if (imageData) {
-    parts.push({
-      inlineData: {
-        mimeType: 'image/jpeg', // or detect from input
-        data: imageData
-      }
-    });
-  }
 
-  // Add text prompt
-  if (userMessage) {
-    parts.push({ text: `${systemPrompt}\n\nUser Query: ${userMessage}` });
-  }
+    const response = result.response.text();
 
-  // Generate response
-  const result = await model.generateContent({
-    contents: [{
-      role: 'user',
-      parts: parts
-    }]
-  });
+    // Update chat history
+    session.history.push(
+      { role: 'user', parts },
+      { role: 'model', parts: [{ text: response }] }
+    );
 
-  const response = result.response.text();
-
-  // Update chat history
-  session.history.push(
-    { role: 'user', parts },
-    { role: 'model', parts: [{ text: response }] }
-  );
-
-  return { text: response };
+    return { text: response };
 
   } catch (error) {
     console.error("Chat Error:", error);
-    return { 
-      text: imageData 
+    return {
+      text: imageData
         ? "I couldn't analyze that image. Please describe the issue in text."
         : "I'm having trouble responding. Please try again."
     };

@@ -8,7 +8,7 @@ const router = Router();
 // endpoint to add a new dataset
 router.post("/upload", authorize, uploadFile, datasetController.upload);
 
-// endpoint to read all datasets
+// endpoint to read all datasets with pagination
 router.get("/", authorize, datasetController.readAll);
 
 // endpoint to read a dataset by id

@@ -13,11 +13,12 @@ export const upload = async (req, res, next) => {
     })(req, res, next);
 }
 
-// Controller to read all datasets
+// Controller to read all datasets with pagination
 export const readAll = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const user_id = req.userId;
-        const datasets = await datasetService.readAll(user_id);
+        const { limit, page } = req.query;
+        const datasets = await datasetService.readAll(user_id, limit, page);
         return sendResponse(res, datasets, "Datasets read successfully", 200);
     })(req, res, next);
 }
