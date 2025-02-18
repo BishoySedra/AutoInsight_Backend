@@ -1,13 +1,71 @@
 import Dataset from "../DB/models/dataset.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
+import cloudinary from "../utils/cloudinary.js";
+import fs from "fs";
+import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Service to add a new dataset
 export const upload = async (user_id, datasetData, datasetURL) => {
+
+    // check if the dataset url is provided
+    if (!datasetURL) {
+        throw createCustomError(`Dataset URL is required`, 400);
+    }
+
+    const FASTAPI_URL = process.env.FASTAPI_URL;
+    // console.log('Making request to FastAPI server:', FASTAPI_URL);
+
+    const response = await axios.post(`${FASTAPI_URL}/analyze-data`,
+        { cloudinary_url: datasetURL }, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        timeout: 300000, // 5 minutes
+        maxBodyLength: Infinity
+    });
+
+    // getting images inside the response
+    const images = response.data.images;
+
+    // decode the base64 string and save the image to cloudinary
+    const imageUrls = [];
+
+    for (let i = 0; i < images.length; i++) {
+
+        // get the image
+        const image = images[i].image;
+
+        // decode the base64 string
+        const base64Data = image.split(';base64,').pop();
+
+        // save the image to a file
+        const filename = `${images[i].name}.png`;
+        fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
+
+        // upload the image to cloudinary
+        const result = await cloudinary.uploader.upload(filename, {
+            folder: 'analysis',
+            public_id: filename,
+            overwrite: true
+        });
+
+        imageUrls.push(result.secure_url);
+
+        fs.unlinkSync(filename);
+    }
+
+    // save the dataset to the database
     const dataset = new Dataset({
         user_id,
         dataset_name: datasetData.dataset_name,
-        dataset_url: datasetURL
+        dataset_url: datasetURL,
+        insights_urls: imageUrls
     });
+
     await dataset.save();
     return dataset;
 };

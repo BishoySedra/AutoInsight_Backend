@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
+    "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.4.0",
     "cors": "^2.8.5",
@@ -21,6 +22,7 @@
     "express": "^4.19.2",
     "express-mongo-sanitize": "^2.2.0",
     "fastest-levenshtein": "^1.0.16",
+    "form-data": "^4.0.2",
     "helmet": "^7.1.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
