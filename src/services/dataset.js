@@ -1,4 +1,5 @@
 import Dataset from "../DB/models/dataset.js";
+import User from "../DB/models/user.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
 import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
@@ -88,22 +89,36 @@ export const readAll = async (user_id, limit, page) => {
     // get the datasets
     const datasets = await Dataset.find({ user_id }).skip(skip).limit(limitPerPage);
 
+    // populate the user details using the user_id
+    const user = await User.findById(user_id).select("-password -__v");
+
+    // return the datasets with the user details
     return {
         totalDatasets,
-        datasets
+        datasets,
+        user
     };
 };
 
 // Service to read a dataset by id
 export const readById = async (dataset_id) => {
 
+    // check if the dataset_id is valid
     const dataset = await Dataset.findOne({ _id: dataset_id });
 
+    // check if the dataset exists
     if (!dataset) {
         throw createCustomError(`Dataset not found`, 404);
     }
 
-    return dataset;
+    // populate the user details using the user_id
+    const user = await User.findById(dataset.user_id).select("-password -__v");
+
+    // return the dataset with the user details
+    return {
+        dataset,
+        user
+    };
 };
 
 // Service to delete a dataset by id
