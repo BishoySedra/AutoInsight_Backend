@@ -2,14 +2,9 @@ import fs from 'fs';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { distance } from "fastest-levenshtein"; // Import fuzzy matching library
 
-
-
-// GEMINI API START
-// Ensure proper chat history structure with valid roles and format.
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const chats = new Map();
 const faqData = JSON.parse(fs.readFileSync("./src/utils/faq.json", "utf-8"));
-
 
 const findClosestMatch = (userMessage) => {
   let bestMatch = null;
@@ -28,6 +23,11 @@ const findClosestMatch = (userMessage) => {
   return bestMatch;
 };
 
+// Helper function to convert image to Base64
+const encodeImageToBase64 = (imagePath) => {
+  return fs.readFileSync(imagePath, { encoding: 'base64' });
+};
+
 export const chatFn = async (userMessage, sessionId, imageData) => {
   try {
     // Check if the question exists in FAQ
@@ -37,7 +37,7 @@ export const chatFn = async (userMessage, sessionId, imageData) => {
     }
 
     const systemPrompt = `
-    You are a customer support chatbot for an application called AutoInsight. Analyze both text ang images related to the following:
+    You are a customer support chatbot for an application called AutoInsight. Analyze both text and images related to the following:
     - CSV data analysis
     - Generated charts/graphs
     - App screenshots
@@ -57,75 +57,70 @@ export const chatFn = async (userMessage, sessionId, imageData) => {
     Is my data stored permanently? No, AutoInsight processes your file temporarily and does not store your data.
     Can I analyze multiple files at once? Currently, AutoInsight supports one file at a time. Batch analysis will be available soon!
     `;
-    //   const systemPrompt= `
-    //   You are a support chatbot for AutoInsight. Analyze both text and images related to:
-    //   - CSV data analysis
-    //   - Generated charts/graphs
-    //   - App screenshots
-    //   - Error messages
-    //   For non-app-related content, respond: "I specialize in AutoInsight data analysis."
+  
+  if (!chats.has(sessionId)) {
+    chats.set(sessionId, {
+      model: 'gemini-1.5-flash',
+      history: [
+        { role: 'user', parts: [{ text: systemPrompt }] },
+        { role: 'model', parts: [{ text: 'Ready to analyze AutoInsight data and visuals.' }] }
+      ]
+    });
+  }
+  const session = chats.get(sessionId);
+  const model = genAI.getGenerativeModel({ model: session.model });
+  const parts = [];
 
-    //   When analyzing images:
-    //   1. Describe visual content
-    //   2. Explain technical details
-    //   3. Relate to AutoInsight features
-    //   4. Keep responses under 300 words
-    // `;
-    if (!chats.has(sessionId)) {
-      chats.set(sessionId, {
-        // model: imageData ? 'gemini-pro-vision' : 'gemini-pro',
-        model: 'gemini-1.5-flash',
-        history: [
-          { role: 'user', parts: [{ text: systemPrompt }] },
-          { role: 'model', parts: [{ text: 'Ready to analyze AutoInsight data and visuals.' }] }
-        ]
-      });
-    }
-    const session = chats.get(sessionId);
-    const model = genAI.getGenerativeModel({ model: session.model });
-    const parts = [];
-
-    // Add image if present
-    if (imageData) {
-      parts.push({
-        inlineData: {
-          mimeType: 'image/jpeg', // or detect from input
-          data: imageData
-        }
-      });
+  // Add image if present
+  if (imageData) {
+    // Check if imageData is a file path or actual Base64 string
+    let base64Image;
+    if (imageData.startsWith('data:image')) {
+      // It's already a Base64 string
+      base64Image = imageData.split(',')[1];
+    } else {
+      // Convert image from file path to Base64
+      base64Image = encodeImageToBase64(imageData);
     }
 
-    // Add text prompt
-    if (userMessage) {
-      parts.push({ text: `${systemPrompt}\n\nUser Query: ${userMessage}` });
-    }
-
-    // Generate response
-    const result = await model.generateContent({
-      contents: [{
-        role: 'user',
-        parts: parts
-      }]
+    parts.push({
+      inlineData: {
+        mimeType: 'image/jpeg', // Adjust mimeType based on the image type
+        data: base64Image
+      }
     });
 
-    const response = result.response.text();
+    session.history.push({ role: 'user', parts: [{ inlineData: { mimeType: 'image/jpeg', data: base64Image } }] });
+  }
 
-    // Update chat history
-    session.history.push(
-      { role: 'user', parts },
-      { role: 'model', parts: [{ text: response }] }
-    );
+  // Add text prompt
+  if (userMessage) {
+    parts.push({ text: userMessage });
 
-    return { text: response };
+    // Store user message in history
+    session.history.push({ role: 'user', parts: [{ text: userMessage }] });
+  }
+
+  const lastFewMessages = session.history.slice(-5);
+
+  // Generate response
+  const result = await model.generateContent({
+    contents: lastFewMessages  // Pass entire chat history, including images
+  });
+
+  const response = result.response.text();
+
+  // Update chat history
+  session.history.push({ role: 'model', parts: [{ text: response }] });
+
+  return { text: response };
 
   } catch (error) {
     console.error("Chat Error:", error);
-    return {
-      text: imageData
+    return { 
+      text: imageData 
         ? "I couldn't analyze that image. Please describe the issue in text."
         : "I'm having trouble responding. Please try again."
     };
   }
 };
-// GEMINI API END
-
