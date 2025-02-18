@@ -1,5 +1,6 @@
 import Dataset from "../DB/models/dataset.js";
 import User from "../DB/models/user.js";
+import SharedDataset from "../DB/models/shared_dataset.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
 import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
@@ -158,7 +159,7 @@ export const share = async (dataset_id, user_id) => {
         throw createCustomError(`User already has access to the dataset`, 400);
     }
 
-    // check if the user_id is already in the permissions list
+    // add the user_id to the permissions list
     dataset.permissions.push(user_id);
 
     // add the username using the user_id to the shared_usernames list
@@ -171,6 +172,15 @@ export const share = async (dataset_id, user_id) => {
 
     // check if the username is already in the shared_usernames list
     dataset.shared_usernames.push(user.username);
+
+    // add the dataset_id and user_id to the shared_datasets collection
+    const sharedDataset = new SharedDataset({
+        dataset_id,
+        user_id
+    });
+
+    // save the shared dataset
+    await sharedDataset.save();
 
     // save the updated dataset
     await dataset.save();
@@ -211,6 +221,9 @@ export const unshare = async (dataset_id, user_id) => {
     // remove the username from the shared_usernames list
     dataset.shared_usernames = dataset.shared_usernames.filter(username => username !== user.username);
 
+    // remove the dataset_id and user_id from the shared_datasets collection
+    await SharedDataset.deleteOne({ dataset_id, user_id });
+
     // save the updated dataset
     await dataset.save();
 };
@@ -227,4 +240,23 @@ export const readPermissions = async (dataset_id) => {
     }
 
     return dataset.permissions;
+};
+
+// Service to get all datasets shared with the user
+export const readShared = async (user_id) => {
+
+    // get the dataset_ids shared with the user
+    const sharedDatasets = await SharedDataset.find({ user_id });
+
+    // get the datasets using the dataset_ids
+    const datasets = await Dataset.find({ _id: { $in: sharedDatasets.map(sharedDataset => sharedDataset.dataset_id) } });
+
+    // populate the user details using the user_id
+    const user = await User.findById(user_id).select("-password -__v");
+
+    // return the datasets with the user details
+    return {
+        datasets,
+        user
+    };
 };

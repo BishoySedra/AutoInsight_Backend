@@ -70,3 +70,12 @@ export const readPermissions = async (req, res, next) => {
         return sendResponse(res, permissions, "Permissions read successfully", 200);
     })(req, res, next);
 }
+
+// Controller to get all datasets shared with the user
+export const readShared = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const user_id = req.userId;
+        const datasets = await datasetService.readShared(user_id);
+        return sendResponse(res, datasets, "Datasets read successfully", 200);
+    })(req, res, next);
+}

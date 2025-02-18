@@ -11,6 +11,9 @@ router.post("/upload", authorize, uploadFile, datasetController.upload);
 // endpoint to read all datasets with pagination
 router.get("/", authorize, datasetController.readAll);
 
+// endpoint to get all datasets shared with the user
+router.get("/shared", authorize, datasetController.readShared);
+
 // endpoint to read a dataset by id
 router.get("/:dataset_id", authorize, datasetController.readById);
 
@@ -25,5 +28,6 @@ router.delete("/:dataset_id/share", authorize, datasetController.unshare);
 
 // endpoint to read permissions of a dataset
 router.get("/:dataset_id/share", authorize, datasetController.readPermissions);
+
 
 export default router;
