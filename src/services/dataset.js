@@ -161,6 +161,17 @@ export const share = async (dataset_id, user_id) => {
     // check if the user_id is already in the permissions list
     dataset.permissions.push(user_id);
 
+    // add the username using the user_id to the shared_usernames list
+    const user = await User.findById(user_id);
+
+    // check if the user exists
+    if (!user) {
+        throw createCustomError(`User not found`, 404);
+    }
+
+    // check if the username is already in the shared_usernames list
+    dataset.shared_usernames.push(user.username);
+
     // save the updated dataset
     await dataset.save();
 };
@@ -188,6 +199,17 @@ export const unshare = async (dataset_id, user_id) => {
 
     // remove the user_id from the permissions list
     dataset.permissions = dataset.permissions.filter(permission => permission.toString() !== user_id);
+
+    // remove the username using the user_id from the shared_usernames list
+    const user = await User.findById(user_id);
+
+    // check if the user exists
+    if (!user) {
+        throw createCustomError(`User not found`, 404);
+    }
+
+    // remove the username from the shared_usernames list
+    dataset.shared_usernames = dataset.shared_usernames.filter(username => username !== user.username);
 
     // save the updated dataset
     await dataset.save();

@@ -23,6 +23,12 @@ const DatasetSchema = new mongoose.Schema(
                 ref: "User",
             },
         ],
+        shared_usernames: [
+            {
+                type: String,
+                trim: true,
+            },
+        ],
         insights_urls: [
             {
                 type: String,
