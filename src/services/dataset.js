@@ -30,34 +30,45 @@ export const upload = async (user_id, datasetData, datasetURL) => {
         maxBodyLength: Infinity
     });
 
+    if (!response.data?.images || !Array.isArray(response.data.images)) {
+        throw createCustomError("Invalid response format from analysis service", 500);
+      }
+
     // getting images inside the response
     const images = response.data.images;
-
     // decode the base64 string and save the image to cloudinary
     const imageUrls = [];
 
     for (let i = 0; i < images.length; i++) {
-
-        // get the image
-        const image = images[i].image;
-
-        // decode the base64 string
-        const base64Data = image.split(';base64,').pop();
-
-        // save the image to a file
-        const filename = `${images[i].name}.png`;
-        fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
-
-        // upload the image to cloudinary
-        const result = await cloudinary.uploader.upload(filename, {
-            folder: 'analysis',
-            public_id: filename,
-            overwrite: true
-        });
-
-        imageUrls.push(result.secure_url);
-
-        fs.unlinkSync(filename);
+        try {
+            // get the image
+            const image = images[i];
+    
+            // decode the base64 string
+            const base64Data = image.split(';base64,').pop();
+            if (!base64Data) {
+                throw new Error("Invalid base64 format: Missing data");
+            }
+            // save the image to a file
+            const filename = `analysis_${Date.now()}_${i}.png`;  // Unique timestamp-based name
+            fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
+    
+            // upload the image to cloudinary
+            const result = await cloudinary.uploader.upload(filename, {
+                folder: 'analysis',
+                public_id: filename.split('.')[0],
+                overwrite: true
+            });
+    
+            imageUrls.push(result.secure_url);
+    
+            fs.unlinkSync(filename);
+        } catch (err) {
+            if (fs.existsSync(filename)) {
+                fs.unlinkSync(filename);
+            }
+            throw createCustomError(`Image processing failed: ${err.message}`, 500);
+        }
     }
 
     // save the dataset to the database

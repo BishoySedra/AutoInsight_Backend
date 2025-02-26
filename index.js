@@ -27,6 +27,13 @@ app.use(cors());
 // The request handler must be the first middleware on the app
 app.use(express.json());
 
+
+// Set logger middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Set security HTTP headers
 app.use(helmet());
 
