@@ -7,7 +7,7 @@ const DatasetSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
-        dataset_name: {
+        dataset_name: { // 2olna hn save fe cloudinary feen ?
             type: String,
             required: true,
             trim: true,
@@ -17,24 +17,23 @@ const DatasetSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-        permissions: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User",
-            },
-        ],
+        cleaned_dataset_url : {
+            type: String,
+            trim: true,
+        },
         shared_usernames: [
             {
                 type: String,
                 trim: true,
             },
         ],
-        insights_urls: [
-            {
-                type: String,
-                trim: true,
-            },
-        ],
+        insights_urls: {
+            pie_chart: [{ type: String, trim: true }],
+            bar_chart: [{ type: String, trim: true }],
+            kde: [{ type: String, trim: true }],
+            histogram: [{ type: String, trim: true }],
+            correlation: [{ type: String, trim: true }]
+        },
     },
     { timestamps: true } // Automatically adds createdAt and updatedAt
 );

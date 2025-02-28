@@ -89,6 +89,7 @@ export const grantUserAccess = (req, res, next) => {
   wrapper(async (req, res, next) => {
     const { userPermissions } = req.body;
     const user_id = req.userId;
+    // [{ userId, 'view'}, { userId, 'admin'}, { userId, 'edit '}]
     
     // Validate that we have session data from previous steps
     if (!req.session.uploadData || !req.session.uploadData.domainType) {
@@ -155,9 +156,7 @@ export const generateInsights = async (req, res) => {
       const { uploadData } = req.session;
       const analysis_option = uploadData.processingOptions.analysis_option;
       // Pass all collected data to your analysis service
-      let dataset;
-      if (analysis_option === 'clean_only') {
-        dataset = await datasetService.clean(
+      let dataset = await datasetService.clean(
             req.userId,
             {
               dataset_name: req.body.dataset_name,
@@ -167,7 +166,8 @@ export const generateInsights = async (req, res) => {
             },
             uploadData.fileUrl
           );
-      } else if ( analysis_option === 'clean_and_generate') {
+        
+        if ( analysis_option === 'clean_and_generate') {
           dataset = await datasetService.analyze(
             req.userId,
             {
