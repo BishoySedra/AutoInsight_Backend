@@ -8,10 +8,195 @@ export const upload = async (req, res, next) => {
         const datasetData = req.body;
         const user_id = req.userId;
         const datasetURL = req.file_url;
-        const dataset = await datasetService.upload(user_id, datasetData, datasetURL);
+        const dataset = await datasetService.analyze(user_id, datasetData, datasetURL);
         return sendResponse(res, dataset, "Dataset added successfully", 201);
     })(req, res, next);
 }
+
+export const selectDomain = (req, res, next) => {
+    wrapper(async (req, res, next) => {
+      const { domainType } = req.body;
+      const user_id = req.userId;
+      
+      // Validate domain type
+      const validDomains = ['ecommerce', 'HR'];
+      if (!validDomains.includes(domainType)) {
+        throw createCustomError('Invalid domain type selected', 400);
+      }
+      
+      // Initialize or update session data for this user's current workflow
+      if (!req.session.uploadData) {
+        req.session.uploadData = {};
+      }
+      
+      // Store domain information
+      req.session.uploadData = {
+        ...req.session.uploadData,
+        user_id,
+        domainType,
+        step: 'domain-selected',
+        timestamp: new Date().toISOString()
+      };
+      
+      // Save session
+      await req.session.save();
+      
+      return sendResponse(res, { 
+        domainType,
+        nextStep: '/upload',
+        sessionId: req.sessionID
+      }, `${domainType} domain selected successfully`, 200);
+    })(req, res, next);
+  };
+
+export const storeFile = (req, res) => {
+    // Get uploaded file from middleware
+    const datasetURL = req.file_url;
+    
+    // Store in session or database with pending status
+    req.session.uploadData = {
+      step: 'upload',
+      fileUrl: datasetURL,
+      domainType: req.body.domainType,
+      status: 'pending'
+    };
+    
+    return sendResponse(res, { 
+      fileUrl: datasetURL,
+      nextStep: '/processing-options' 
+    }, "File uploaded successfully", 200);
+  };
+
+
+  export const selectOptions = (req, res) => {
+    // Get processing preferences
+    const { analysis_option , downloadAfterCreating } = req.body;
+    
+    // Update session data
+    req.session.uploadData.processingOptions = {
+      analysis_option,
+      downloadAfterCreating
+    };
+    req.session.uploadData.step = 'processing';
+    
+    return sendResponse(res, { 
+      nextStep: '/grant-access' 
+    }, "Processing options saved", 200);
+  };
+
+// Access Controller
+export const grantUserAccess = (req, res, next) => {
+  wrapper(async (req, res, next) => {
+    const { users, permissions } = req.body;
+    const user_id = req.userId;
+    
+    // Validate that we have session data from previous steps
+    if (!req.session.uploadData || !req.session.uploadData.domainType) {
+      throw createCustomError('Missing previous step data. Please start from the beginning.', 400);
+    }
+    
+    // Validate user access data
+    if (users && !Array.isArray(users)) {
+      throw createCustomError('Users must be provided as an array', 400);
+    }
+    
+    // Validate permissions format
+    const validPermissions = ['view', 'edit', 'admin'];
+    if (permissions) {
+      if (typeof permissions !== 'object') {
+        throw createCustomError('Permissions must be provided as an object', 400);
+      }
+      
+      // Check that all permissions are valid
+      Object.values(permissions).forEach(perm => {
+        if (!validPermissions.includes(perm)) {
+          throw createCustomError(`Invalid permission: ${perm}. Must be one of: ${validPermissions.join(', ')}`, 400);
+        }
+      });
+    }
+    
+    // Update session with access information
+    req.session.uploadData = {
+      ...req.session.uploadData,
+      userAccess: {
+        users: users || [],
+        permissions: permissions || {},
+        owner: user_id
+      },
+      step: 'access-granted'
+    };
+    
+    // Save session
+    await req.session.save();
+    
+    // Determine if this is the final step or if there's a next step
+    const isComplete = req.session.uploadData.fileUrl && 
+                      req.session.uploadData.processingOptions;
+    
+    let responseData = {
+      accessGranted: true,
+      users: users?.length || 0
+    };
+    
+    if (isComplete) {
+      responseData.nextStep = '/generate-insights';
+      responseData.isComplete = true;
+    } else {
+      // If some previous step was skipped, direct back to it
+      if (!req.session.uploadData.fileUrl) {
+        responseData.nextStep = '/upload';
+      } else if (!req.session.uploadData.processingOptions) {
+        responseData.nextStep = '/processing-options';
+      }
+    }
+    
+    return sendResponse(res, responseData, "Access permissions saved successfully", 200);
+  })(req, res, next);
+};
+
+
+
+  
+// Final step that triggers the analysis
+export const generateInsights = async (req, res) => {
+    try {
+      const { uploadData } = req.session;
+      const analysis_option = uploadData.processingOptions.analysis_option;
+      // Pass all collected data to your analysis service
+      let dataset;
+      if (analysis_option === 'clean_only') {
+        dataset = await datasetService.clean(
+            req.userId,
+            {
+              dataset_name: req.body.dataset_name,
+              domainType: uploadData.domainType,
+              processingOptions: uploadData.processingOptions,
+              userAccess: uploadData.userAccess
+            },
+            uploadData.fileUrl
+          );
+      } else if ( analysis_option === 'clean_and_generate') {
+          dataset = await datasetService.analyze(
+            req.userId,
+            {
+              dataset_name: req.body.dataset_name,
+              domainType: uploadData.domainType,
+              processingOptions: uploadData.processingOptions,
+              userAccess: uploadData.userAccess
+            },
+            uploadData.fileUrl
+          );
+      }
+      
+      // Clear session data after successful processing
+      req.session.uploadData = null;
+      
+      return sendResponse(res, dataset, "Dataset analyzed successfully", 201);
+    } catch (error) {
+      next(error);
+    }
+  }
+
 
 // Controller to read all datasets with pagination
 export const readAll = async (req, res, next) => {

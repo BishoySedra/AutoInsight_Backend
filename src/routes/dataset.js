@@ -5,8 +5,15 @@ import authorize from "../middlewares/authorization/authorize.js";
 
 const router = Router();
 
+
+router.post("/choose-domain", authorize, datasetController.selectDomain);
+router.post("/upload", authorize, uploadFile, datasetController.storeFile);
+router.post("/processing-options", authorize, datasetController.selectOptions);
+router.post("/grant-access", authorize, datasetController.grantUserAccess);
+router.post("/generate-insights", authorize, datasetController.generateInsights);
+
 // endpoint to add a new dataset
-router.post("/upload", authorize, uploadFile, datasetController.upload);
+// router.post("/upload", authorize, uploadFile, datasetController.upload);
 
 // endpoint to read all datasets with pagination
 router.get("/", authorize, datasetController.readAll);

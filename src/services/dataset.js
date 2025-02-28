@@ -10,7 +10,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Service to add a new dataset
-export const upload = async (user_id, datasetData, datasetURL) => {
+export const analyze = async (user_id, datasetData, datasetURL) => {
 
     // check if the dataset url is provided
     if (!datasetURL) {
@@ -77,6 +77,42 @@ export const upload = async (user_id, datasetData, datasetURL) => {
         dataset_name: datasetData.dataset_name,
         dataset_url: datasetURL,
         insights_urls: imageUrls
+    });
+
+    await dataset.save();
+    return dataset;
+};
+export const clean = async (user_id, datasetData, datasetURL) => {
+
+    // check if the dataset url is provided
+    if (!datasetURL) {
+        throw createCustomError(`Dataset URL is required`, 400);
+    }
+
+    const FASTAPI_URL = process.env.FASTAPI_URL;
+    // console.log('Making request to FastAPI server:', FASTAPI_URL);
+
+    const response = await axios.post(`${FASTAPI_URL}/clean-data`,
+        { cloudinary_url: datasetURL }, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        timeout: 300000, // 5 minutes
+        maxBodyLength: Infinity
+    });
+
+    if (!response.data?.images || !Array.isArray(response.data.images)) {
+        throw createCustomError("Invalid response format from analysis service", 500);
+      }
+
+    // getting images inside the response
+    const images = response.data.images;
+
+    const dataset = new Dataset({
+        user_id,
+        dataset_name: datasetData.dataset_name,
+        dataset_url: datasetURL,
     });
 
     await dataset.save();
