@@ -87,7 +87,7 @@ export const storeFile = (req, res) => {
 // Access Controller
 export const grantUserAccess = (req, res, next) => {
   wrapper(async (req, res, next) => {
-    const { userPermissions } = req.body;
+    const userPermissions = req.body.userPermissions;
     const user_id = req.userId;
     // [{ userId, 'view'}, { userId, 'admin'}, { userId, 'edit '}]
     
@@ -179,6 +179,27 @@ export const generateInsights = async (req, res) => {
             uploadData.fileUrl
           );
       }
+    
+      // loop on this array uploadData.userAccess.userPermissions
+        // for each user, create a new entry in the permissions collection
+
+        // create a new entry in the permissions collection
+        // {
+        //   dataset_id: dataset._id,
+        //   user_id: user_id,
+        //   permission: permission
+        // }
+
+        // create a new entry in the shared_usernames collection
+
+        for (const userPermission of uploadData.userAccess.userPermissions) {
+            await datasetService.share(dataset._id, userPermission.userId, userPermission.permission);
+            }
+
+        if (uploadData.processingOptions.downloadAfterCreating) {
+            await datasetService.download(dataset._id);
+        }
+
 
       // Clear session data after successful processing
       req.session.uploadData = null;
