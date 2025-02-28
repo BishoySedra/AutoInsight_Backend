@@ -55,9 +55,9 @@ export const storeFile = (req, res) => {
     
     // Store in session or database with pending status
     req.session.uploadData = {
+      ...req.session.uploadData,
       step: 'upload',
       fileUrl: datasetURL,
-      domainType: req.body.domainType,
       status: 'pending'
     };
     
@@ -87,7 +87,7 @@ export const storeFile = (req, res) => {
 // Access Controller
 export const grantUserAccess = (req, res, next) => {
   wrapper(async (req, res, next) => {
-    const { users, permissions } = req.body;
+    const { userPermissions } = req.body;
     const user_id = req.userId;
     
     // Validate that we have session data from previous steps
@@ -95,60 +95,52 @@ export const grantUserAccess = (req, res, next) => {
       throw createCustomError('Missing previous step data. Please start from the beginning.', 400);
     }
     
-    // Validate user access data
-    if (users && !Array.isArray(users)) {
-      throw createCustomError('Users must be provided as an array', 400);
+    // Validate userPermissions structure
+    if (!userPermissions || !Array.isArray(userPermissions)) {
+      throw createCustomError('userPermissions must be provided as an array of user objects', 400);
     }
     
-    // Validate permissions format
-    const validPermissions = ['view', 'edit', 'admin'];
-    if (permissions) {
-      if (typeof permissions !== 'object') {
-        throw createCustomError('Permissions must be provided as an object', 400);
+    // Validate each user permission entry
+    const validPermissionTypes = ['view', 'edit', 'admin'];
+    for (const entry of userPermissions) {
+      if (!entry.userId || !entry.permission) {
+        throw createCustomError('Each user permission entry must contain userId and permission', 400);
       }
       
-      // Check that all permissions are valid
-      Object.values(permissions).forEach(perm => {
-        if (!validPermissions.includes(perm)) {
-          throw createCustomError(`Invalid permission: ${perm}. Must be one of: ${validPermissions.join(', ')}`, 400);
-        }
-      });
+      if (!validPermissionTypes.includes(entry.permission)) {
+        throw createCustomError(`Invalid permission: ${entry.permission}. Must be one of: ${validPermissionTypes.join(', ')}`, 400);
+      }
     }
     
     // Update session with access information
     req.session.uploadData = {
-      ...req.session.uploadData,
-      userAccess: {
-        users: users || [],
-        permissions: permissions || {},
-        owner: user_id
-      },
-      step: 'access-granted'
-    };
+        ...req.session.uploadData,
+        userAccess: {
+          userPermissions,
+          owner: user_id
+        },
+        step: 'access-granted'
+      };
     
     // Save session
     await req.session.save();
     
-    // Determine if this is the final step or if there's a next step
-    const isComplete = req.session.uploadData.fileUrl && 
-                      req.session.uploadData.processingOptions;
-    
     let responseData = {
-      accessGranted: true,
-      users: users?.length || 0
-    };
-    
-    if (isComplete) {
-      responseData.nextStep = '/generate-insights';
-      responseData.isComplete = true;
-    } else {
-      // If some previous step was skipped, direct back to it
-      if (!req.session.uploadData.fileUrl) {
-        responseData.nextStep = '/upload';
-      } else if (!req.session.uploadData.processingOptions) {
-        responseData.nextStep = '/processing-options';
+        accessGranted: true,
+        usersCount: userPermissions.length
+      };
+      
+      if (isComplete) {
+        responseData.nextStep = '/generate-insights';
+        responseData.isComplete = true;
+      } else {
+        // If some previous step was skipped, direct back to it
+        if (!req.session.uploadData.fileUrl) {
+          responseData.nextStep = '/upload';
+        } else if (!req.session.uploadData.processingOptions) {
+          responseData.nextStep = '/processing-options';
+        }
       }
-    }
     
     return sendResponse(res, responseData, "Access permissions saved successfully", 200);
   })(req, res, next);
@@ -171,7 +163,7 @@ export const generateInsights = async (req, res) => {
               dataset_name: req.body.dataset_name,
               domainType: uploadData.domainType,
               processingOptions: uploadData.processingOptions,
-              userAccess: uploadData.userAccess
+              userAccess: uploadData.userAccess // userAccess.users, .permissions, .owner
             },
             uploadData.fileUrl
           );
@@ -182,12 +174,12 @@ export const generateInsights = async (req, res) => {
               dataset_name: req.body.dataset_name,
               domainType: uploadData.domainType,
               processingOptions: uploadData.processingOptions,
-              userAccess: uploadData.userAccess
+              userAccess: uploadData.userAccess // userAccess.users, .permissions, .owner
             },
             uploadData.fileUrl
           );
       }
-      
+
       // Clear session data after successful processing
       req.session.uploadData = null;
       
