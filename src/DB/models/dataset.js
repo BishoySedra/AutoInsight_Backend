@@ -32,7 +32,7 @@ const DatasetSchema = new mongoose.Schema(
             bar_chart: [{ type: String, trim: true }],
             kde: [{ type: String, trim: true }],
             histogram: [{ type: String, trim: true }],
-            correlation: [{ type: String, trim: true }]
+            correlation: [{ type: String, trim: true }],
         },
     },
     { timestamps: true } // Automatically adds createdAt and updatedAt
