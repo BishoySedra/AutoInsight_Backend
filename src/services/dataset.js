@@ -32,7 +32,7 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
 
     if (!response.data?.images || !Array.isArray(response.data.images)) {
         throw createCustomError("Invalid response format from analysis service", 500);
-      }
+    }
 
     // getting images inside the response
     const images = response.data.images;
@@ -43,7 +43,7 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
         try {
             // get the image
             const image = images[i];
-    
+
             // decode the base64 string
             const base64Data = image.split(';base64,').pop();
             if (!base64Data) {
@@ -52,16 +52,16 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
             // save the image to a file
             const filename = `analysis_${Date.now()}_${i}.png`;  // Unique timestamp-based name
             fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
-    
+
             // upload the image to cloudinary
             const result = await cloudinary.uploader.upload(filename, {
                 folder: 'analysis',
                 public_id: filename.split('.')[0],
                 overwrite: true
             });
-    
+
             imageUrls.push(result.secure_url);
-    
+
             fs.unlinkSync(filename);
         } catch (err) {
             if (fs.existsSync(filename)) {
@@ -82,10 +82,15 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
     await dataset.save();
     return dataset;
 };
-export const clean = async (user_id, datasetData, datasetURL) => {
+
+// Service to clean a dataset
+export const clean = async (user_id, datasetData) => {
+
+    // get the dataset url
+    const { fileUrl, dataset_name, userAccess } = datasetData;
 
     // check if the dataset url is provided
-    if (!datasetURL) {
+    if (!fileUrl) {
         throw createCustomError(`Dataset URL is required`, 400);
     }
 
@@ -93,7 +98,7 @@ export const clean = async (user_id, datasetData, datasetURL) => {
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
 
     const response = await axios.post(`${FASTAPI_URL}/clean-data`,
-        { cloudinary_url: datasetURL }, {
+        { cloudinary_url: fileUrl, filter_number: 10 }, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -102,20 +107,21 @@ export const clean = async (user_id, datasetData, datasetURL) => {
         maxBodyLength: Infinity
     });
 
-    if (!response.data?.images || !Array.isArray(response.data.images)) {
-        throw createCustomError("Invalid response format from analysis service", 500);
-      }
-
-    // getting images inside the response
-    const images = response.data.images;
+    console.log(response.data);
 
     const dataset = new Dataset({
         user_id,
-        dataset_name: datasetData.dataset_name,
-        dataset_url: datasetURL,
+        dataset_name,
+        dataset_url: fileUrl
     });
 
     await dataset.save();
+
+    // looping through userAccess to grant access to the dataset to the users
+    for (let i = 0; i < userAccess.length; i++) {
+        await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+    }
+
     return dataset;
 };
 
@@ -186,7 +192,7 @@ export const deleteDataset = async (dataset_id, user_id) => {
 };
 
 // Service to give permission to a user to access a dataset
-export const share = async (dataset_id, user_id) => {
+export const share = async (dataset_id, user_id, permission) => {
 
     // check if the dataset_id is valid
     const dataset = await Dataset.findOne({ _id: dataset_id });
@@ -200,14 +206,6 @@ export const share = async (dataset_id, user_id) => {
     if (dataset.user_id.toString() === user_id) {
         throw createCustomError(`You are already the owner of the dataset`, 400);
     }
-
-    // check if the user_id is already in the permissions list
-    if (dataset.permissions.includes(user_id)) {
-        throw createCustomError(`User already has access to the dataset`, 400);
-    }
-
-    // add the user_id to the permissions list
-    dataset.permissions.push(user_id);
 
     // add the username using the user_id to the shared_usernames list
     const user = await User.findById(user_id);
@@ -223,7 +221,8 @@ export const share = async (dataset_id, user_id) => {
     // add the dataset_id and user_id to the shared_datasets collection
     const sharedDataset = new SharedDataset({
         dataset_id,
-        user_id
+        user_id,
+        permission
     });
 
     // save the shared dataset

@@ -6,7 +6,6 @@ import helmet from "helmet";
 import cors from "cors";
 import session from 'express-session';
 
-
 // import csurf from "csurf";
 import connectDB from "./src/DB/config.js";
 import authRouter from "./src/routes/auth.js";
@@ -29,15 +28,13 @@ app.use(cors());
 
 // The request handler must be the first middleware on the app
 app.use(express.json());
-// For production, use a proper session store like Redis or MongoDB
+
+// Enable sessions
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
+  saveUninitialized: true,
+  cookie: { secure: false }
 }));
 
 // Set logger middleware
