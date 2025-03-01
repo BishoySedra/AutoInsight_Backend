@@ -32,7 +32,7 @@ const uploadFile = (req, res, next) => {
 
             // save the result secure_url to request object
             req.file_url = result.secure_url;
-
+            console.log(req.file);
             next();
         });
     });

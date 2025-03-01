@@ -10,10 +10,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Service to add a new dataset
-export const analyze = async (user_id, datasetData, datasetURL) => {
+export const analyze = async (user_id, datasetData) => {
+
+
+    // get the dataset url
+    const { fileUrl, dataset_name, userAccess, dataset_id } = datasetData;
 
     // check if the dataset url is provided
-    if (!datasetURL) {
+    if (!fileUrl) {
         throw createCustomError(`Dataset URL is required`, 400);
     }
 
@@ -21,7 +25,7 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
 
     const response = await axios.post(`${FASTAPI_URL}/analyze-data`,
-        { cloudinary_url: datasetURL }, {
+        { cloudinary_url: fileUrl }, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -33,11 +37,76 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
     if (!response.data?.images || !Array.isArray(response.data.images)) {
         throw createCustomError("Invalid response format from analysis service", 500);
     }
-
     // getting images inside the response
     const images = response.data.images;
-    // decode the base64 string and save the image to cloudinary
-    const imageUrls = [];
+    const classifiedImages = {
+        pie_chart: [],
+        bar_chart: [],
+        histogram: [],
+        kde: [],
+        correlation: [],
+        summary_report: [],
+        others: []
+    };
+
+    images.forEach(([base64Image, plotType]) => {
+        if (classifiedImages.hasOwnProperty(plotType)) {
+            classifiedImages[plotType].push(base64Image);
+        } else {
+            classifiedImages.others.push(base64Image);
+        }
+    });
+
+    // Step 3: Process and upload images
+    const uploadedImages = {
+        pie_chart: [],
+        bar_chart: [],
+        histogram: [],
+        kde: [],
+        correlation: [],
+        summary_report: [],
+        others: []
+    };
+
+    for (const [category, imageArray] of Object.entries(classifiedImages)) {
+        for (let i = 0; i < imageArray.length; i++) {
+            const base64Image = imageArray[i];
+            const base64Data = base64Image.split(';base64,').pop();
+
+            if (!base64Data) {
+                console.error(`Invalid base64 format in ${category} at index ${i}`);
+                continue;
+            }
+
+            // Step 4: Save image to file
+            const filename = `analysis_${Date.now()}_${i}.png`;
+            fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
+
+            try {
+                // Step 5: Upload to Cloudinary
+                const result = await cloudinary.uploader.upload(filename, {
+                    folder: 'analysis',
+                    public_id: filename.split('.')[0],
+                    overwrite: true
+                });
+
+                // Store the URL in the correct category as an object
+                uploadedImages[category].push(result.secure_url);
+
+                // Step 6: Delete local file
+                fs.unlinkSync(filename);
+            } catch (uploadError) {
+                console.error(`Error uploading ${filename} to Cloudinary:`, uploadError);
+            }
+        }
+    }
+
+    console.log('Uploaded Images:', uploadedImages);
+    const dataset = await Dataset.findByIdAndUpdate(dataset_id, { insights_urls: uploadedImages }, { new: true });
+    return dataset;
+    return uploadedImages;
+
+
 
     for (let i = 0; i < images.length; i++) {
         try {
@@ -71,16 +140,7 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
         }
     }
 
-    // save the dataset to the database
-    const dataset = new Dataset({
-        user_id,
-        dataset_name: datasetData.dataset_name,
-        dataset_url: datasetURL,
-        insights_urls: imageUrls
-    });
 
-    await dataset.save();
-    return dataset;
 };
 
 // Service to clean a dataset
@@ -112,7 +172,8 @@ export const clean = async (user_id, datasetData) => {
     const dataset = new Dataset({
         user_id,
         dataset_name,
-        dataset_url: fileUrl
+        dataset_url: fileUrl,
+        cleaned_dataset_url: response.data.cleaned_csv
     });
 
     await dataset.save();

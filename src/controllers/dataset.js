@@ -70,7 +70,8 @@ export const storeFile = (req, res, next) => {
       ...req.session.uploadData,
       step: 'upload',
       fileUrl: datasetURL,
-      status: 'pending'
+      status: 'pending',
+      dataset_name: req.file.originalname
     };
 
     // Save session
@@ -203,7 +204,6 @@ export const generateInsights = async (req, res, next) => {
   wrapper(async (req, res) => {
 
     const { uploadData } = req.session;
-
     // user_id: '67b673095e4d0a6c618b5c71', --> done!
     // domainType: 'ecommerce',
     // step: 'access-granted',
@@ -222,7 +222,7 @@ export const generateInsights = async (req, res, next) => {
     let dataset = await datasetService.clean(
       req.userId,
       {
-        dataset_name: req.body.dataset_name,
+        dataset_name: uploadData.dataset_name,
         domainType: uploadData.domainType,
         downloadOption: uploadData.processingOptions.downloadAfterCreating,
         userAccess: uploadData.userAccess,
@@ -234,17 +234,18 @@ export const generateInsights = async (req, res, next) => {
     if (analysis_option === 'clean_and_generate') {
       dataset = await datasetService.analyze(
         req.userId,
-        {
-          dataset_name: req.body.dataset_name,
+        { dataset_id: dataset._id,
+          cleaned_dataset_url: dataset.cleaned_dataset_url,
+          dataset_name: uploadData.dataset_name,
+          fileUrl: uploadData.fileUrl,
           domainType: uploadData.domainType,
           processingOptions: uploadData.processingOptions,
           userAccess: uploadData.userAccess // userAccess.users, .permissions, .owner
-        },
-        uploadData.fileUrl
+        }
       );
     }
 
-    // loop on this array uploadData.userAccess.userPermissions
+    // loop on this array uploadData.userAccess.userPermissionsw
     // for each user, create a new entry in the permissions collection
 
     // create a new entry in the permissions collection
