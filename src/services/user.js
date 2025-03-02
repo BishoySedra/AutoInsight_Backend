@@ -58,3 +58,11 @@ export const searchUsersByUsername = async (username) => {
       throw error;
     }
   };
+
+export const getUserByEmail = async (email) => {
+    const user = await User.find({email}).select("-password");
+    if (!user) {
+        throw createCustomError(`User not found`, 404);
+    }
+    return user;
+}
