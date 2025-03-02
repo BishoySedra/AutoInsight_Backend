@@ -19,6 +19,14 @@ const uploadFile = (req, res, next) => {
             });
         }
 
+        if (!req.file) {
+            return res.status(400).json({
+                message: "No file uploaded",
+                body: null,
+                status: 400
+            });
+        }
+        
         // Proceed with Cloudinary upload only if there's no error
         cloudinary.uploader.upload(req.file.path, { resource_type: "auto" }, function (err, result) {
 

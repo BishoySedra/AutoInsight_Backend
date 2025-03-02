@@ -64,7 +64,7 @@ export const storeFile = (req, res, next) => {
   wrapper(async (req, res, next) => {
     // Get uploaded file from middleware
     const datasetURL = req.file_url;
-
+    
     // Store in session or database with pending status
     req.session.uploadData = {
       ...req.session.uploadData,
@@ -204,6 +204,7 @@ export const generateInsights = async (req, res, next) => {
   wrapper(async (req, res) => {
 
     const { uploadData } = req.session;
+    console.log(uploadData);
     // user_id: '67b673095e4d0a6c618b5c71', --> done!
     // domainType: 'ecommerce',
     // step: 'access-granted',
@@ -273,7 +274,7 @@ export const generateInsights = async (req, res, next) => {
     console.log('Session data:', req.session);
     console.log("=====================================");
 
-    return sendResponse(res, dataset, downloadAfterCreating,  "Dataset analyzed successfully", 201);
+    return sendResponse(res, {dataset, downloadAfterCreating, analysis_option},  "Dataset analyzed successfully", 201);
   })(req, res, next);
 }
 
