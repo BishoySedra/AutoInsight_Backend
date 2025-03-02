@@ -194,7 +194,7 @@ export const grantUserAccess = (req, res, next) => {
         responseData.nextStep = '/processing-options';
       }
     }
-
+    console.log(req.session.uploadData);
     return sendResponse(res, responseData, "Access permissions saved successfully", 200);
   })(req, res, next);
 };

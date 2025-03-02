@@ -61,10 +61,9 @@ export const analyze = async (user_id, datasetData) => {
     const uploadedImages = {
         pie_chart: [],
         bar_chart: [],
-        histogram: [],
         kde: [],
+        histogram: [],
         correlation: [],
-        summary_report: [],
         others: []
     };
 
