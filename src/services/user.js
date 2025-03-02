@@ -47,3 +47,14 @@ export const getUserData = async (userId) => {
     return user;
 };
 
+export const searchUsersByUsername = async (username) => {
+    try {
+      // Use a case-insensitive regular expression for partial matching
+      const users = await User.find({
+        username: { $regex: username, $options: 'i' }
+      });
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  };
