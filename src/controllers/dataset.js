@@ -266,13 +266,14 @@ export const generateInsights = async (req, res, next) => {
     // }
 
     // Clear session data after successful processing
+    const downloadAfterCreating = uploadData.processingOptions.downloadAfterCreating;
     req.session.uploadData = null;
 
     console.log('Insights generated step');
     console.log('Session data:', req.session);
     console.log("=====================================");
 
-    return sendResponse(res, dataset, "Dataset analyzed successfully", 201);
+    return sendResponse(res, dataset, downloadAfterCreating,  "Dataset analyzed successfully", 201);
   })(req, res, next);
 }
 
