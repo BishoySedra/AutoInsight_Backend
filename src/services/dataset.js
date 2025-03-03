@@ -1,7 +1,7 @@
 import Dataset from "../DB/models/dataset.js";
 import User from "../DB/models/user.js";
 import SharedDataset from "../DB/models/shared_dataset.js";
-import { createCustomError } from "../middlewares/errors/customError.js";
+import { createCustomError, CustomError } from "../middlewares/errors/customError.js";
 import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
 import axios from "axios";
@@ -178,8 +178,11 @@ export const clean = async (user_id, datasetData) => {
     await dataset.save();
 
     // looping through userAccess to grant access to the dataset to the users
-    for (let i = 0; i < userAccess.length; i++) {
-        await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+    if (Array.isArray(userAccess) && userAccess.length > 0) {
+        for (let i = 0; i < userAccess.length; i++) 
+            await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+    } else {
+        throw createCustomError("Invalid user access data", 400);
     }
 
     return dataset;
