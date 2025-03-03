@@ -221,18 +221,6 @@ export const generateInsights = async (req, res, next) => {
         },
       );
     }
-    if (analysis_option === 'clean_only') {
-        dataset = await datasetService.clean(
-        req.userId,
-        {
-          dataset_name: uploadData.dataset_name,
-          domainType: uploadData.domainType,
-          downloadOption: uploadData.processingOptions.downloadAfterCreating,
-          userAccess: uploadData.userAccess,
-          fileUrl: uploadData.fileUrl
-        },
-      );
-    }
 
     if (analysis_option === 'clean_and_generate') {
       dataset = await datasetService.analyze(
