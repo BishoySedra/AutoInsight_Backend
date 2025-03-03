@@ -205,38 +205,28 @@ export const generateInsights = async (req, res, next) => {
 
     const { uploadData } = req.session;
     console.log(uploadData);
-    // user_id: '67b673095e4d0a6c618b5c71', --> done!
-    // domainType: 'ecommerce',
-    // step: 'access-granted',
-    // timestamp: '2025-03-01T01:25:36.703Z',
-    // fileUrl: 'https://res.cloudinary.com/dwd6kau8a/raw/upload/v1740792348/ceivo0ba3quso76xe0jf.csv', --> done!
-    // status: 'pending',
-    // processingOptions: {
-    //   analysis_option: 'clean_and_generate',
-    //   downloadAfterCreating: true --> done!
-    // },
-    // userAccess: { userPermissions: [Array], owner: '67b673095e4d0a6c618b5c71' } --> done!
 
     const analysis_option = uploadData.processingOptions.analysis_option;
 
+    let dataset;
     // Pass all collected data to your analysis service
-    let dataset = await datasetService.clean(
-      req.userId,
-      {
-        dataset_name: uploadData.dataset_name,
-        domainType: uploadData.domainType,
-        downloadOption: uploadData.processingOptions.downloadAfterCreating,
-        userAccess: uploadData.userAccess,
-        fileUrl: uploadData.fileUrl
-      },
-
-    );
+    if (analysis_option === 'clean_only') {
+        dataset = await datasetService.clean(
+        req.userId,
+        {
+          dataset_name: uploadData.dataset_name,
+          domainType: uploadData.domainType,
+          downloadOption: uploadData.processingOptions.downloadAfterCreating,
+          userAccess: uploadData.userAccess,
+          fileUrl: uploadData.fileUrl
+        },
+      );
+    }
 
     if (analysis_option === 'clean_and_generate') {
       dataset = await datasetService.analyze(
         req.userId,
-        { dataset_id: dataset._id,
-          cleaned_dataset_url: dataset.cleaned_dataset_url,
+        { 
           dataset_name: uploadData.dataset_name,
           fileUrl: uploadData.fileUrl,
           domainType: uploadData.domainType,
@@ -245,26 +235,6 @@ export const generateInsights = async (req, res, next) => {
         }
       );
     }
-
-    // loop on this array uploadData.userAccess.userPermissionsw
-    // for each user, create a new entry in the permissions collection
-
-    // create a new entry in the permissions collection
-    // {
-    //   dataset_id: dataset._id,
-    //   user_id: user_id,
-    //   permission: permission
-    // }
-
-    // create a new entry in the shared_usernames collection
-
-    // for (const userPermission of uploadData.userAccess.userPermissions) {
-    //   await datasetService.share(dataset._id, userPermission.userId, userPermission.permission);
-    // }
-
-    // if (uploadData.processingOptions.downloadAfterCreating) {
-    //   await datasetService.download(dataset._id);
-    // }
 
     // Clear session data after successful processing
     const downloadAfterCreating = uploadData.processingOptions.downloadAfterCreating;
@@ -350,7 +320,7 @@ export const editDatasetName = (req, res, next) => {
   wrapper(async (req, res, next) => {
     const { dataset_id } = req.params;
     const { dataset_name } = req.body;
-    const dataset = await datasetService.editDatasetName(dataset_id, req.userId ,dataset_name);
+    const dataset = await datasetService.editDatasetName(dataset_id, req.userId,dataset_name);
     return sendResponse(res, dataset, "Dataset name edited successfully", 200);
   })(req, res, next);
 }

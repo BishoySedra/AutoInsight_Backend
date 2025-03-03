@@ -14,7 +14,7 @@ export const analyze = async (user_id, datasetData) => {
 
 
     // get the dataset url
-    const { fileUrl, dataset_name, userAccess, dataset_id } = datasetData;
+    const { fileUrl, dataset_id, userAccess, dataset_name } = datasetData;
 
     // check if the dataset url is provided
     if (!fileUrl) {
@@ -99,13 +99,18 @@ export const analyze = async (user_id, datasetData) => {
             }
         }
     }
-
     console.log('Uploaded Images:', uploadedImages);
-    const dataset = await Dataset.findByIdAndUpdate(dataset_id, { insights_urls: uploadedImages }, { new: true });
+    const dataset = new Dataset({dataset_id, dataset_url: fileUrl, insights_urls: uploadedImages, dataset_name, user_id});
+    await dataset.save();    
+    // looping through userAccess to grant access to the dataset to the users
+    if (Array.isArray(userAccess) && userAccess.length > 0) {
+        for (let i = 0; i < userAccess.length; i++) 
+            await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+    }
+    
     return dataset;
+
     return uploadedImages;
-
-
 
     for (let i = 0; i < images.length; i++) {
         try {
@@ -181,8 +186,6 @@ export const clean = async (user_id, datasetData) => {
     if (Array.isArray(userAccess) && userAccess.length > 0) {
         for (let i = 0; i < userAccess.length; i++) 
             await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
-    } else {
-        throw createCustomError("Invalid user access data", 400);
     }
 
     return dataset;
