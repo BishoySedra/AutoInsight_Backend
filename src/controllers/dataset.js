@@ -203,78 +203,49 @@ export const generateInsights = async (req, res, next) => {
   wrapper(async (req, res) => {
 
     const { uploadData } = req.session;
-
-    // user_id: '67b673095e4d0a6c618b5c71', --> done!
-    // domainType: 'ecommerce',
-    // step: 'access-granted',
-    // timestamp: '2025-03-01T01:25:36.703Z',
-    // fileUrl: 'https://res.cloudinary.com/dwd6kau8a/raw/upload/v1740792348/ceivo0ba3quso76xe0jf.csv', --> done!
-    // status: 'pending',
-    // processingOptions: {
-    //   analysis_option: 'clean_and_generate',
-    //   downloadAfterCreating: true --> done!
-    // },
-    // userAccess: { userPermissions: [Array], owner: '67b673095e4d0a6c618b5c71' } --> done!
+    console.log(uploadData);
 
     const analysis_option = uploadData.processingOptions.analysis_option;
 
+    let dataset;
     // Pass all collected data to your analysis service
-    let dataset = await datasetService.clean(
-      req.userId,
-      {
-        dataset_name: req.body.dataset_name,
-        domainType: uploadData.domainType,
-        downloadOption: uploadData.processingOptions.downloadAfterCreating,
-        userAccess: uploadData.userAccess,
-        fileUrl: uploadData.fileUrl
-      },
-
-    );
-
-    if (analysis_option === 'clean_and_generate') {
-      dataset = await datasetService.analyze(
+    if (analysis_option === 'clean_only') {
+        dataset = await datasetService.clean(
         req.userId,
         {
-          dataset_name: req.body.dataset_name,
+          dataset_name: uploadData.dataset_name,
           domainType: uploadData.domainType,
           downloadOption: uploadData.processingOptions.downloadAfterCreating,
           userAccess: uploadData.userAccess,
           fileUrl: uploadData.fileUrl
+        },
+      );
+    }
+
+    if (analysis_option === 'clean_and_generate') {
+      dataset = await datasetService.analyze(
+        req.userId,
+        { 
+          dataset_name: uploadData.dataset_name,
+          fileUrl: uploadData.fileUrl,
+          domainType: uploadData.domainType,
+          processingOptions: uploadData.processingOptions,
+          userAccess: uploadData.userAccess // userAccess.users, .permissions, .owner
         }
       );
     }
 
-    // loop on this array uploadData.userAccess.userPermissions
-    // for each user, create a new entry in the permissions collection
-
-    // create a new entry in the permissions collection
-    // {
-    //   dataset_id: dataset._id,
-    //   user_id: user_id,
-    //   permission: permission
-    // }
-
-    // create a new entry in the shared_usernames collection
-
-    // for (const userPermission of uploadData.userAccess.userPermissions) {
-    //   await datasetService.share(dataset._id, userPermission.userId, userPermission.permission);
-    // }
-
-    // if (uploadData.processingOptions.downloadAfterCreating) {
-    //   await datasetService.download(dataset._id);
-    // }
-
     // Clear session data after successful processing
+    const downloadAfterCreating = uploadData.processingOptions.downloadAfterCreating;
     req.session.uploadData = null;
 
-    // console.log('Insights generated step');
-    // console.log('Session data:', req.session);
-    // console.log("=====================================");
+    console.log('Insights generated step');
+    console.log('Session data:', req.session);
+    console.log("=====================================");
 
-    return sendResponse(res, dataset, "Dataset analyzed successfully", 201);
+    return sendResponse(res, {dataset, downloadAfterCreating, analysis_option},  "Dataset analyzed successfully", 201);
   })(req, res, next);
 }
-
 
 // Controller to read all datasets with pagination
 export const readAll = async (req, res, next) => {
