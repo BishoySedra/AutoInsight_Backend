@@ -228,7 +228,6 @@ export const generateInsights = async (req, res, next) => {
         userAccess: uploadData.userAccess,
         fileUrl: uploadData.fileUrl
       },
-
     );
 
     if (analysis_option === 'clean_and_generate') {
@@ -238,9 +237,9 @@ export const generateInsights = async (req, res, next) => {
           dataset_name: req.body.dataset_name,
           domainType: uploadData.domainType,
           processingOptions: uploadData.processingOptions,
-          userAccess: uploadData.userAccess // userAccess.users, .permissions, .owner
-        },
-        uploadData.fileUrl
+          userAccess: uploadData.userAccess,
+          fileUrl: uploadData.fileUrl
+        }
       );
     }
 
@@ -267,9 +266,9 @@ export const generateInsights = async (req, res, next) => {
     // Clear session data after successful processing
     req.session.uploadData = null;
 
-    console.log('Insights generated step');
-    console.log('Session data:', req.session);
-    console.log("=====================================");
+    // console.log('Insights generated step');
+    // console.log('Session data:', req.session);
+    // console.log("=====================================");
 
     return sendResponse(res, dataset, "Dataset analyzed successfully", 201);
   })(req, res, next);

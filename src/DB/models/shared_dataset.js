@@ -11,7 +11,7 @@ const SharedDatasetSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
             required: true,
-        }, 
+        },
         permission: {
             type: String,
             enum: ['view', 'edit', 'admin'],

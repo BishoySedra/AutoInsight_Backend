@@ -10,33 +10,42 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Service to add a new dataset
-export const analyze = async (user_id, datasetData, datasetURL) => {
+export const analyze = async (user_id, datasetData) => {
+
+    // get the dataset url
+    const { fileUrl, dataset_name, userAccess } = datasetData;
 
     // check if the dataset url is provided
-    if (!datasetURL) {
+    if (!fileUrl) {
         throw createCustomError(`Dataset URL is required`, 400);
     }
 
     const FASTAPI_URL = process.env.FASTAPI_URL;
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
 
-    const response = await axios.post(`${FASTAPI_URL}/analyze-data`,
-        { cloudinary_url: datasetURL }, {
+    const response = await axios.post(`${FASTAPI_URL}/analyze-data`, {
+        cloudinary_url: fileUrl,
+        filter_number: 10
+    }, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        timeout: 300000, // 5 minutes
+        timeout: 300000,
         maxBodyLength: Infinity
     });
 
+    // console.log(response.data);
+
+
+    // we want to extract the images from the response
     if (!response.data?.images || !Array.isArray(response.data.images)) {
         throw createCustomError("Invalid response format from analysis service", 500);
     }
 
-    // getting images inside the response
-    const images = response.data.images;
-    // decode the base64 string and save the image to cloudinary
+    const { cleaned_csv, images } = response.data;
+
+    // convert the base64 images to cloudinary urls
     const imageUrls = [];
 
     for (let i = 0; i < images.length; i++) {
@@ -45,12 +54,16 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
             const image = images[i];
 
             // decode the base64 string
-            const base64Data = image.split(';base64,').pop();
+            const base64Data = image[0].split(';base64,').pop();
             if (!base64Data) {
                 throw new Error("Invalid base64 format: Missing data");
             }
+
+            // getting the name of the chart
+            const chartName = image[1];
+
             // save the image to a file
-            const filename = `analysis_${Date.now()}_${i}.png`;  // Unique timestamp-based name
+            const filename = `analysis_${chartName}_${i}.png`;  // Unique timestamp-based name
             fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
 
             // upload the image to cloudinary
@@ -60,26 +73,56 @@ export const analyze = async (user_id, datasetData, datasetURL) => {
                 overwrite: true
             });
 
-            imageUrls.push(result.secure_url);
+            imageUrls.push({ image: result.secure_url, name: chartName });
 
             fs.unlinkSync(filename);
+
         } catch (err) {
+
             if (fs.existsSync(filename)) {
                 fs.unlinkSync(filename);
             }
+
             throw createCustomError(`Image processing failed: ${err.message}`, 500);
         }
     }
 
-    // save the dataset to the database
     const dataset = new Dataset({
         user_id,
-        dataset_name: datasetData.dataset_name,
-        dataset_url: datasetURL,
-        insights_urls: imageUrls
+        dataset_name,
+        dataset_url: fileUrl,
+        cleaned_dataset_url: cleaned_csv,
     });
 
+    const insights_urls = dataset.insights_urls;
+
+    // looping through insights_urls by chart_name to save the cloudinary urls
+    for (let i = 0; i < imageUrls.length; i++) {
+        const { image, name } = imageUrls[i];
+        if (name === 'pie_chart') {
+            insights_urls.pie_chart.push(image);
+        } else if (name === 'bar_chart') {
+            insights_urls.bar_chart.push(image);
+        } else if (name === 'kde') {
+            insights_urls.kde.push(image);
+        } else if (name === 'histogram') {
+            insights_urls.histogram.push(image);
+        } else if (name === 'correlation') {
+            insights_urls.correlation.push(image);
+        } else {
+            insights_urls.other.push(image);
+        }
+    }
+
+    dataset.insights_urls = insights_urls;
+
     await dataset.save();
+
+    // looping through userAccess to grant access to the dataset to the users
+    for (let i = 0; i < userAccess.length; i++) {
+        await share(dataset._id, userAccess[i].userId, userAccess[i].permission);
+    }
+
     return dataset;
 };
 
@@ -97,29 +140,34 @@ export const clean = async (user_id, datasetData) => {
     const FASTAPI_URL = process.env.FASTAPI_URL;
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
 
-    const response = await axios.post(`${FASTAPI_URL}/clean-data`,
-        { cloudinary_url: fileUrl, filter_number: 10 }, {
+    const response = await axios.post(`${FASTAPI_URL}/clean-data`, {
+        cloudinary_url: fileUrl,
+        filter_number: 10
+    }, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        timeout: 300000, // 5 minutes
+        timeout: 300000,
         maxBodyLength: Infinity
     });
 
     console.log(response.data);
 
+    const { cleaned_csv } = response.data;
+
     const dataset = new Dataset({
         user_id,
         dataset_name,
-        dataset_url: fileUrl
+        dataset_url: fileUrl,
+        cleaned_dataset_url: cleaned_csv
     });
 
     await dataset.save();
 
     // looping through userAccess to grant access to the dataset to the users
     for (let i = 0; i < userAccess.length; i++) {
-        await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+        await share(dataset._id, userAccess[i].userId, userAccess[i].permission);
     }
 
     return dataset;
