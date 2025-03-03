@@ -12,8 +12,9 @@ dotenv.config();
 // Service to add a new dataset
 export const analyze = async (user_id, datasetData) => {
 
+
     // get the dataset url
-    const { fileUrl, dataset_name, userAccess } = datasetData;
+    const { fileUrl, dataset_id, userAccess, dataset_name } = datasetData;
 
     // check if the dataset url is provided
     if (!fileUrl) {
@@ -23,30 +24,93 @@ export const analyze = async (user_id, datasetData) => {
     const FASTAPI_URL = process.env.FASTAPI_URL;
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
 
-    const response = await axios.post(`${FASTAPI_URL}/analyze-data`, {
-        cloudinary_url: fileUrl,
-        filter_number: 10
-    }, {
+    const response = await axios.post(`${FASTAPI_URL}/analyze-data`,
+        { cloudinary_url: fileUrl }, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        timeout: 300000,
+        timeout: 300000, // 5 minutes
         maxBodyLength: Infinity
     });
 
-    // console.log(response.data);
-
-
-    // we want to extract the images from the response
     if (!response.data?.images || !Array.isArray(response.data.images)) {
         throw createCustomError("Invalid response format from analysis service", 500);
     }
+    // getting images inside the response
+    const images = response.data.images;
+    const classifiedImages = {
+        pie_chart: [],
+        bar_chart: [],
+        histogram: [],
+        kde: [],
+        correlation: [],
+        summary_report: [],
+        others: []
+    };
 
-    const { cleaned_csv, images } = response.data;
+    images.forEach(([base64Image, plotType]) => {
+        if (classifiedImages.hasOwnProperty(plotType)) {
+            classifiedImages[plotType].push(base64Image);
+        } else {
+            classifiedImages.others.push(base64Image);
+        }
+    });
 
-    // convert the base64 images to cloudinary urls
-    const imageUrls = [];
+    // Step 3: Process and upload images
+    const uploadedImages = {
+        pie_chart: [],
+        bar_chart: [],
+        kde: [],
+        histogram: [],
+        correlation: [],
+        others: []
+    };
+
+    for (const [category, imageArray] of Object.entries(classifiedImages)) {
+        for (let i = 0; i < imageArray.length; i++) {
+            const base64Image = imageArray[i];
+            const base64Data = base64Image.split(';base64,').pop();
+
+            if (!base64Data) {
+                console.error(`Invalid base64 format in ${category} at index ${i}`);
+                continue;
+            }
+
+            // Step 4: Save image to file
+            const filename = `analysis_${Date.now()}_${i}.png`;
+            fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
+
+            try {
+                // Step 5: Upload to Cloudinary
+                const result = await cloudinary.uploader.upload(filename, {
+                    folder: 'analysis',
+                    public_id: filename.split('.')[0],
+                    overwrite: true
+                });
+
+                // Store the URL in the correct category as an object
+                uploadedImages[category].push(result.secure_url);
+
+                // Step 6: Delete local file
+                fs.unlinkSync(filename);
+            } catch (uploadError) {
+                console.error(`Error uploading ${filename} to Cloudinary:`, uploadError);
+            }
+        }
+    }
+    console.log('Uploaded Images:', uploadedImages);
+    const dataset = new Dataset({dataset_id, dataset_url: fileUrl, insights_urls: uploadedImages, dataset_name, user_id});
+    await dataset.save();    
+    // looping through userAccess to grant access to the dataset to the users
+    if (Array.isArray(userAccess) && userAccess.length > 0) {
+        for (let i = 0; i < userAccess.length; i++) 
+            await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+    }
+    
+    return dataset;
+
+    return uploadedImages;
 
     for (let i = 0; i < images.length; i++) {
         try {
@@ -54,16 +118,12 @@ export const analyze = async (user_id, datasetData) => {
             const image = images[i];
 
             // decode the base64 string
-            const base64Data = image[0].split(';base64,').pop();
+            const base64Data = image.split(';base64,').pop();
             if (!base64Data) {
                 throw new Error("Invalid base64 format: Missing data");
             }
-
-            // getting the name of the chart
-            const chartName = image[1];
-
             // save the image to a file
-            const filename = `analysis_${chartName}_${i}.png`;  // Unique timestamp-based name
+            const filename = `analysis_${Date.now()}_${i}.png`;  // Unique timestamp-based name
             fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
 
             // upload the image to cloudinary
@@ -73,57 +133,18 @@ export const analyze = async (user_id, datasetData) => {
                 overwrite: true
             });
 
-            imageUrls.push({ image: result.secure_url, name: chartName });
+            imageUrls.push(result.secure_url);
 
             fs.unlinkSync(filename);
-
         } catch (err) {
-
             if (fs.existsSync(filename)) {
                 fs.unlinkSync(filename);
             }
-
             throw createCustomError(`Image processing failed: ${err.message}`, 500);
         }
     }
 
-    const dataset = new Dataset({
-        user_id,
-        dataset_name,
-        dataset_url: fileUrl,
-        cleaned_dataset_url: cleaned_csv,
-    });
 
-    const insights_urls = dataset.insights_urls;
-
-    // looping through insights_urls by chart_name to save the cloudinary urls
-    for (let i = 0; i < imageUrls.length; i++) {
-        const { image, name } = imageUrls[i];
-        if (name === 'pie_chart') {
-            insights_urls.pie_chart.push(image);
-        } else if (name === 'bar_chart') {
-            insights_urls.bar_chart.push(image);
-        } else if (name === 'kde') {
-            insights_urls.kde.push(image);
-        } else if (name === 'histogram') {
-            insights_urls.histogram.push(image);
-        } else if (name === 'correlation') {
-            insights_urls.correlation.push(image);
-        } else {
-            insights_urls.other.push(image);
-        }
-    }
-
-    dataset.insights_urls = insights_urls;
-
-    await dataset.save();
-
-    // looping through userAccess to grant access to the dataset to the users
-    for (let i = 0; i < userAccess.length; i++) {
-        await share(dataset._id, userAccess[i].userId, userAccess[i].permission);
-    }
-
-    return dataset;
 };
 
 // Service to clean a dataset
@@ -140,34 +161,31 @@ export const clean = async (user_id, datasetData) => {
     const FASTAPI_URL = process.env.FASTAPI_URL;
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
 
-    const response = await axios.post(`${FASTAPI_URL}/clean-data`, {
-        cloudinary_url: fileUrl,
-        filter_number: 10
-    }, {
+    const response = await axios.post(`${FASTAPI_URL}/clean-data`,
+        { cloudinary_url: fileUrl, filter_number: 10 }, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        timeout: 300000,
+        timeout: 300000, // 5 minutes
         maxBodyLength: Infinity
     });
 
     console.log(response.data);
 
-    const { cleaned_csv } = response.data;
-
     const dataset = new Dataset({
         user_id,
         dataset_name,
         dataset_url: fileUrl,
-        cleaned_dataset_url: cleaned_csv
+        cleaned_dataset_url: response.data.cleaned_csv
     });
 
     await dataset.save();
 
     // looping through userAccess to grant access to the dataset to the users
-    for (let i = 0; i < userAccess.length; i++) {
-        await share(dataset._id, userAccess[i].userId, userAccess[i].permission);
+    if (Array.isArray(userAccess) && userAccess.length > 0) {
+        for (let i = 0; i < userAccess.length; i++) 
+            await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
     }
 
     return dataset;
