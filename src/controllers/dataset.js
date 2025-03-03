@@ -238,7 +238,6 @@ export const generateInsights = async (req, res, next) => {
       dataset = await datasetService.analyze(
         req.userId,
         { 
-        { 
           dataset_name: uploadData.dataset_name,
           fileUrl: uploadData.fileUrl,
           domainType: uploadData.domainType,
