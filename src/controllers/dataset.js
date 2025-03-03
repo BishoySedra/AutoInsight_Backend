@@ -345,3 +345,12 @@ export const readShared = async (req, res, next) => {
     return sendResponse(res, datasets, "Datasets read successfully", 200);
   })(req, res, next);
 }
+
+export const editDatasetName = (req, res, next) => {
+  wrapper(async (req, res, next) => {
+    const { dataset_id } = req.params;
+    const { dataset_name } = req.body;
+    const dataset = await datasetService.editDatasetName(dataset_id, req.userId ,dataset_name);
+    return sendResponse(res, dataset, "Dataset name edited successfully", 200);
+  })(req, res, next);
+}

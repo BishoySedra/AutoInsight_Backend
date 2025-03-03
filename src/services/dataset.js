@@ -366,3 +366,25 @@ export const readShared = async (user_id) => {
         user
     };
 };
+
+export const editDatasetName = async (dataset_id, user_id, dataset_name) => {
+
+    // check if the dataset_id is valid
+    const dataset = await Dataset.findOne({ _id: dataset_id });
+
+    // check if the dataset exists
+    if (!dataset) {
+        throw createCustomError(`Dataset not found`, 404);
+    }
+
+    // check if the user_id is the owner of the dataset
+    if (dataset.user_id.toString() !== user_id) {
+        throw createCustomError(`You are not the owner of the dataset`, 400);
+    }
+
+    // update the dataset name
+    dataset.dataset_name = dataset_name;
+
+    // save the updated dataset
+    await dataset.save();
+}
