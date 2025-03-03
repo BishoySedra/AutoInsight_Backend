@@ -64,14 +64,13 @@ export const storeFile = (req, res, next) => {
   wrapper(async (req, res, next) => {
     // Get uploaded file from middleware
     const datasetURL = req.file_url;
-    
+
     // Store in session or database with pending status
     req.session.uploadData = {
       ...req.session.uploadData,
       step: 'upload',
       fileUrl: datasetURL,
-      status: 'pending',
-      dataset_name: req.file.originalname
+      status: 'pending'
     };
 
     // Save session
@@ -194,7 +193,7 @@ export const grantUserAccess = (req, res, next) => {
         responseData.nextStep = '/processing-options';
       }
     }
-    console.log(req.session.uploadData);
+
     return sendResponse(res, responseData, "Access permissions saved successfully", 200);
   })(req, res, next);
 };
@@ -222,10 +221,23 @@ export const generateInsights = async (req, res, next) => {
         },
       );
     }
+    if (analysis_option === 'clean_only') {
+        dataset = await datasetService.clean(
+        req.userId,
+        {
+          dataset_name: uploadData.dataset_name,
+          domainType: uploadData.domainType,
+          downloadOption: uploadData.processingOptions.downloadAfterCreating,
+          userAccess: uploadData.userAccess,
+          fileUrl: uploadData.fileUrl
+        },
+      );
+    }
 
     if (analysis_option === 'clean_and_generate') {
       dataset = await datasetService.analyze(
         req.userId,
+        { 
         { 
           dataset_name: uploadData.dataset_name,
           fileUrl: uploadData.fileUrl,
@@ -247,7 +259,6 @@ export const generateInsights = async (req, res, next) => {
     return sendResponse(res, {dataset, downloadAfterCreating, analysis_option},  "Dataset analyzed successfully", 201);
   })(req, res, next);
 }
-
 
 // Controller to read all datasets with pagination
 export const readAll = async (req, res, next) => {
