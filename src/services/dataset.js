@@ -100,51 +100,16 @@ export const analyze = async (user_id, datasetData) => {
         }
     }
     console.log('Uploaded Images:', uploadedImages);
-    const dataset = new Dataset({dataset_id, dataset_url: fileUrl, insights_urls: uploadedImages, dataset_name, user_id});
-    await dataset.save();    
+    const dataset = new Dataset({ dataset_id, dataset_url: fileUrl, insights_urls: uploadedImages, dataset_name, user_id });
+    // await dataset.save();
+
     // looping through userAccess to grant access to the dataset to the users
     if (Array.isArray(userAccess) && userAccess.length > 0) {
-        for (let i = 0; i < userAccess.length; i++) 
+        for (let i = 0; i < userAccess.length; i++)
             await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
     }
-    
+
     return dataset;
-
-    return uploadedImages;
-
-    for (let i = 0; i < images.length; i++) {
-        try {
-            // get the image
-            const image = images[i];
-
-            // decode the base64 string
-            const base64Data = image.split(';base64,').pop();
-            if (!base64Data) {
-                throw new Error("Invalid base64 format: Missing data");
-            }
-            // save the image to a file
-            const filename = `analysis_${Date.now()}_${i}.png`;  // Unique timestamp-based name
-            fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
-
-            // upload the image to cloudinary
-            const result = await cloudinary.uploader.upload(filename, {
-                folder: 'analysis',
-                public_id: filename.split('.')[0],
-                overwrite: true
-            });
-
-            imageUrls.push(result.secure_url);
-
-            fs.unlinkSync(filename);
-        } catch (err) {
-            if (fs.existsSync(filename)) {
-                fs.unlinkSync(filename);
-            }
-            throw createCustomError(`Image processing failed: ${err.message}`, 500);
-        }
-    }
-
-
 };
 
 // Service to clean a dataset
@@ -180,11 +145,11 @@ export const clean = async (user_id, datasetData) => {
         cleaned_dataset_url: response.data.cleaned_csv
     });
 
-    await dataset.save();
+    // await dataset.save();
 
     // looping through userAccess to grant access to the dataset to the users
     if (Array.isArray(userAccess) && userAccess.length > 0) {
-        for (let i = 0; i < userAccess.length; i++) 
+        for (let i = 0; i < userAccess.length; i++)
             await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
     }
 

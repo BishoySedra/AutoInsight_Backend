@@ -64,7 +64,7 @@ export const storeFile = (req, res, next) => {
   wrapper(async (req, res, next) => {
     // Get uploaded file from middleware
     const datasetURL = req.file_url;
-
+    
     // Store in session or database with pending status
     req.session.uploadData = {
       ...req.session.uploadData,
@@ -196,7 +196,7 @@ export const grantUserAccess = (req, res, next) => {
     }
     console.log(req.session.uploadData);
     console.log(req.session.uploadData.userAccess);
-
+    
     return sendResponse(res, responseData, "Access permissions saved successfully", 200);
   })(req, res, next);
 };
@@ -237,8 +237,7 @@ export const generateInsights = async (req, res, next) => {
     if (analysis_option === 'clean_and_generate') {
       dataset = await datasetService.analyze(
         req.userId,
-        {
-          dataset_id: dataset._id,
+        { dataset_id: dataset._id,
           cleaned_dataset_url: dataset.cleaned_dataset_url,
           dataset_name: uploadData.dataset_name,
           fileUrl: uploadData.fileUrl,
@@ -269,9 +268,6 @@ export const generateInsights = async (req, res, next) => {
     //   await datasetService.download(dataset._id);
     // }
 
-    // save the dataset to the database
-    await dataset.save();
-
     // Clear session data after successful processing
     const downloadAfterCreating = uploadData.processingOptions.downloadAfterCreating;
     req.session.uploadData = null;
@@ -280,7 +276,7 @@ export const generateInsights = async (req, res, next) => {
     console.log('Session data:', req.session);
     console.log("=====================================");
 
-    return sendResponse(res, { dataset, downloadAfterCreating, analysis_option }, "Dataset analyzed successfully", 201);
+    return sendResponse(res, {dataset, downloadAfterCreating, analysis_option},  "Dataset analyzed successfully", 201);
   })(req, res, next);
 }
 
@@ -356,7 +352,7 @@ export const editDatasetName = (req, res, next) => {
   wrapper(async (req, res, next) => {
     const { dataset_id } = req.params;
     const { dataset_name } = req.body;
-    const dataset = await datasetService.editDatasetName(dataset_id, req.userId, dataset_name);
+    const dataset = await datasetService.editDatasetName(dataset_id, req.userId ,dataset_name);
     return sendResponse(res, dataset, "Dataset name edited successfully", 200);
   })(req, res, next);
 }
