@@ -70,8 +70,7 @@ export const storeFile = (req, res, next) => {
       ...req.session.uploadData,
       step: 'upload',
       fileUrl: datasetURL,
-      status: 'pending',
-      dataset_name: req.file.originalname
+      status: 'pending'
     };
 
     // Save session
@@ -194,7 +193,7 @@ export const grantUserAccess = (req, res, next) => {
         responseData.nextStep = '/processing-options';
       }
     }
-    console.log(req.session.uploadData);
+
     return sendResponse(res, responseData, "Access permissions saved successfully", 200);
   })(req, res, next);
 };
@@ -204,7 +203,7 @@ export const generateInsights = async (req, res, next) => {
   wrapper(async (req, res) => {
 
     const { uploadData } = req.session;
-    console.log(uploadData);
+
     // user_id: '67b673095e4d0a6c618b5c71', --> done!
     // domainType: 'ecommerce',
     // step: 'access-granted',
@@ -223,19 +222,20 @@ export const generateInsights = async (req, res, next) => {
     let dataset = await datasetService.clean(
       req.userId,
       {
-        dataset_name: uploadData.dataset_name,
+        dataset_name: req.body.dataset_name,
         domainType: uploadData.domainType,
         downloadOption: uploadData.processingOptions.downloadAfterCreating,
         userAccess: uploadData.userAccess,
         fileUrl: uploadData.fileUrl
       },
+
     );
 
     if (analysis_option === 'clean_and_generate') {
       dataset = await datasetService.analyze(
         req.userId,
         {
-          dataset_name: uploadData.dataset_name,
+          dataset_name: req.body.dataset_name,
           domainType: uploadData.domainType,
           downloadOption: uploadData.processingOptions.downloadAfterCreating,
           userAccess: uploadData.userAccess,
@@ -244,7 +244,7 @@ export const generateInsights = async (req, res, next) => {
       );
     }
 
-    // loop on this array uploadData.userAccess.userPermissionsw
+    // loop on this array uploadData.userAccess.userPermissions
     // for each user, create a new entry in the permissions collection
 
     // create a new entry in the permissions collection
@@ -265,14 +265,13 @@ export const generateInsights = async (req, res, next) => {
     // }
 
     // Clear session data after successful processing
-    const downloadAfterCreating = uploadData.processingOptions.downloadAfterCreating;
     req.session.uploadData = null;
 
     // console.log('Insights generated step');
     // console.log('Session data:', req.session);
     // console.log("=====================================");
 
-    return sendResponse(res, { dataset, downloadAfterCreating, analysis_option }, "Dataset analyzed successfully", 201);
+    return sendResponse(res, dataset, "Dataset analyzed successfully", 201);
   })(req, res, next);
 }
 
@@ -341,14 +340,5 @@ export const readShared = async (req, res, next) => {
     const user_id = req.userId;
     const datasets = await datasetService.readShared(user_id);
     return sendResponse(res, datasets, "Datasets read successfully", 200);
-  })(req, res, next);
-}
-
-export const editDatasetName = (req, res, next) => {
-  wrapper(async (req, res, next) => {
-    const { dataset_id } = req.params;
-    const { dataset_name } = req.body;
-    const dataset = await datasetService.editDatasetName(dataset_id, req.userId, dataset_name);
-    return sendResponse(res, dataset, "Dataset name edited successfully", 200);
   })(req, res, next);
 }
