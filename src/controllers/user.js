@@ -42,3 +42,18 @@ export const getUserDetails = async (req, res, next) => {
         sendResponse(res, data, 'user details fetched successfully', 200);
     })(req, res, next);
 }
+
+export const searchUsers = async (req, res, next) => {
+    try {
+      const { username } = req.query;
+      
+      if (!username) {
+        return res.status(400).json({ error: 'Username query parameter is required' });
+      }
+      
+      const users = await userService.searchUsersByUsername(username);
+      return res.status(200).json({ success: true, data: users });
+    } catch (error) {
+      next(error); // Forward error to your global error handler
+    }
+  };

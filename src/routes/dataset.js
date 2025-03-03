@@ -18,6 +18,8 @@ router.post("/generate-insights", authorize, datasetController.generateInsights)
 // endpoint to read all datasets with pagination
 router.get("/", authorize, datasetController.readAll);
 
+router.patch("/:dataset_id", authorize, datasetController.editDatasetName);
+
 // endpoint to get all datasets shared with the user
 router.get("/shared", authorize, datasetController.readShared);
 

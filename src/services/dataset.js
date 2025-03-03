@@ -1,7 +1,7 @@
 import Dataset from "../DB/models/dataset.js";
 import User from "../DB/models/user.js";
 import SharedDataset from "../DB/models/shared_dataset.js";
-import { createCustomError } from "../middlewares/errors/customError.js";
+import { createCustomError, CustomError } from "../middlewares/errors/customError.js";
 import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
 import axios from "axios";
@@ -12,8 +12,14 @@ dotenv.config();
 // Service to add a new dataset
 export const analyze = async (user_id, datasetData) => {
 
+<<<<<<< HEAD
     // get the dataset url
     const { fileUrl, dataset_name, userAccess } = datasetData;
+=======
+
+    // get the dataset url
+    const { fileUrl, dataset_name, userAccess, dataset_id } = datasetData;
+>>>>>>> f27ee53cdaf2174ff8e15b33cbf57cd2d0329a23
 
     // check if the dataset url is provided
     if (!fileUrl) {
@@ -23,10 +29,15 @@ export const analyze = async (user_id, datasetData) => {
     const FASTAPI_URL = process.env.FASTAPI_URL;
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
 
+<<<<<<< HEAD
     const response = await axios.post(`${FASTAPI_URL}/analyze-data`, {
         cloudinary_url: fileUrl,
         filter_number: 10
     }, {
+=======
+    const response = await axios.post(`${FASTAPI_URL}/analyze-data`,
+        { cloudinary_url: fileUrl }, {
+>>>>>>> f27ee53cdaf2174ff8e15b33cbf57cd2d0329a23
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -42,11 +53,83 @@ export const analyze = async (user_id, datasetData) => {
     if (!response.data?.images || !Array.isArray(response.data.images)) {
         throw createCustomError("Invalid response format from analysis service", 500);
     }
+<<<<<<< HEAD
 
     const { cleaned_csv, images } = response.data;
 
     // convert the base64 images to cloudinary urls
     const imageUrls = [];
+=======
+    // getting images inside the response
+    const images = response.data.images;
+    const classifiedImages = {
+        pie_chart: [],
+        bar_chart: [],
+        histogram: [],
+        kde: [],
+        correlation: [],
+        summary_report: [],
+        others: []
+    };
+
+    images.forEach(([base64Image, plotType]) => {
+        if (classifiedImages.hasOwnProperty(plotType)) {
+            classifiedImages[plotType].push(base64Image);
+        } else {
+            classifiedImages.others.push(base64Image);
+        }
+    });
+
+    // Step 3: Process and upload images
+    const uploadedImages = {
+        pie_chart: [],
+        bar_chart: [],
+        kde: [],
+        histogram: [],
+        correlation: [],
+        others: []
+    };
+
+    for (const [category, imageArray] of Object.entries(classifiedImages)) {
+        for (let i = 0; i < imageArray.length; i++) {
+            const base64Image = imageArray[i];
+            const base64Data = base64Image.split(';base64,').pop();
+
+            if (!base64Data) {
+                console.error(`Invalid base64 format in ${category} at index ${i}`);
+                continue;
+            }
+
+            // Step 4: Save image to file
+            const filename = `analysis_${Date.now()}_${i}.png`;
+            fs.writeFileSync(filename, base64Data, { encoding: 'base64' });
+
+            try {
+                // Step 5: Upload to Cloudinary
+                const result = await cloudinary.uploader.upload(filename, {
+                    folder: 'analysis',
+                    public_id: filename.split('.')[0],
+                    overwrite: true
+                });
+
+                // Store the URL in the correct category as an object
+                uploadedImages[category].push(result.secure_url);
+
+                // Step 6: Delete local file
+                fs.unlinkSync(filename);
+            } catch (uploadError) {
+                console.error(`Error uploading ${filename} to Cloudinary:`, uploadError);
+            }
+        }
+    }
+
+    console.log('Uploaded Images:', uploadedImages);
+    const dataset = await Dataset.findByIdAndUpdate(dataset_id, { insights_urls: uploadedImages }, { new: true });
+    return dataset;
+    return uploadedImages;
+
+
+>>>>>>> f27ee53cdaf2174ff8e15b33cbf57cd2d0329a23
 
     for (let i = 0; i < images.length; i++) {
         try {
@@ -87,6 +170,7 @@ export const analyze = async (user_id, datasetData) => {
         }
     }
 
+<<<<<<< HEAD
     const dataset = new Dataset({
         user_id,
         dataset_name,
@@ -124,6 +208,9 @@ export const analyze = async (user_id, datasetData) => {
     }
 
     return dataset;
+=======
+
+>>>>>>> f27ee53cdaf2174ff8e15b33cbf57cd2d0329a23
 };
 
 // Service to clean a dataset
@@ -160,14 +247,26 @@ export const clean = async (user_id, datasetData) => {
         user_id,
         dataset_name,
         dataset_url: fileUrl,
+<<<<<<< HEAD
         cleaned_dataset_url: cleaned_csv
+=======
+        cleaned_dataset_url: response.data.cleaned_csv
+>>>>>>> f27ee53cdaf2174ff8e15b33cbf57cd2d0329a23
     });
 
     await dataset.save();
 
     // looping through userAccess to grant access to the dataset to the users
+<<<<<<< HEAD
     for (let i = 0; i < userAccess.length; i++) {
         await share(dataset._id, userAccess[i].userId, userAccess[i].permission);
+=======
+    if (Array.isArray(userAccess) && userAccess.length > 0) {
+        for (let i = 0; i < userAccess.length; i++) 
+            await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+    } else {
+        throw createCustomError("Invalid user access data", 400);
+>>>>>>> f27ee53cdaf2174ff8e15b33cbf57cd2d0329a23
     }
 
     return dataset;
@@ -354,3 +453,25 @@ export const readShared = async (user_id) => {
         user
     };
 };
+
+export const editDatasetName = async (dataset_id, user_id, dataset_name) => {
+
+    // check if the dataset_id is valid
+    const dataset = await Dataset.findOne({ _id: dataset_id });
+
+    // check if the dataset exists
+    if (!dataset) {
+        throw createCustomError(`Dataset not found`, 404);
+    }
+
+    // check if the user_id is the owner of the dataset
+    if (dataset.user_id.toString() !== user_id) {
+        throw createCustomError(`You are not the owner of the dataset`, 400);
+    }
+
+    // update the dataset name
+    dataset.dataset_name = dataset_name;
+
+    // save the updated dataset
+    await dataset.save();
+}

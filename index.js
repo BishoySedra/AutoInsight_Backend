@@ -24,7 +24,10 @@ dotenv.config();
 const app = express();
 
 // Enable CORS for all requests (for now)
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
 // The request handler must be the first middleware on the app
 app.use(express.json());

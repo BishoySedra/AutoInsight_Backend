@@ -35,7 +35,15 @@ const userSchema = new mongoose.Schema({
   profile_picture: {
     type: String,
     default: null,
-  }
+  },
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null,
+  },
 });
 
 // Create a model for the user schema

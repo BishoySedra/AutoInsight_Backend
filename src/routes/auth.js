@@ -11,4 +11,8 @@ router.post("/signup", validate(userSchemas.signUpSchema), authController.signUp
 // route to login a user
 router.post("/login", validate(userSchemas.loginSchema), authController.loginUser);
 
+router.post('/forgot-password', authController.forgetPassword);
+
+router.post('/reset-password', authController.resetPassword);
+
 export default router;
