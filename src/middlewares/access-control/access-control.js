@@ -5,9 +5,9 @@ import { createCustomError } from "../errors/customError.js";
 const checkPermission = (requiredPermission) => async (req, res, next) => {
     try {
         const { dataset_id } = req.params;
-        // console.log("dataset_id", dataset_id);
+        console.log("dataset_id", dataset_id);
         const userId = req.userId;
-        // console.log("userId", userId);
+        console.log("userId", userId);
         // Check if the dataset exists
         const dataset = await Dataset.findById(dataset_id);
 
@@ -19,8 +19,7 @@ const checkPermission = (requiredPermission) => async (req, res, next) => {
         if (dataset.user_id.toString() === userId) {
             // console.log("dataset.user_id", dataset.user_id);
             // console.log("userId", userId);
-            next(); // User is the owner, proceed to the next middleware/controller
-            return;
+            return next(); // User is the owner, proceed to the next middleware/controller
         }
 
         // Find the user's permission for the dataset
@@ -34,7 +33,7 @@ const checkPermission = (requiredPermission) => async (req, res, next) => {
         }
 
         const userPermission = sharedDataset.permission;
-
+        console.log(userPermission);
         // Define permission levels
         const permissionLevels = { view: 1, edit: 2, admin: 3 };
 

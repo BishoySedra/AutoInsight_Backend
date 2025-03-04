@@ -366,10 +366,10 @@ export const editDatasetName = async (dataset_id, user_id, dataset_name) => {
         throw createCustomError(`Dataset not found`, 404);
     }
 
-    // check if the user_id is the owner of the dataset
-    if (dataset.user_id.toString() !== user_id) {
-        throw createCustomError(`You are not the owner of the dataset`, 400);
-    }
+    // // check if the user_id is the owner of the dataset
+    // if (dataset.user_id.toString() !== user_id) {
+    //     throw createCustomError(`You are not the owner of the dataset`, 400);
+    // }
 
     // update the dataset name
     dataset.dataset_name = dataset_name;
