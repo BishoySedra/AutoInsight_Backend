@@ -13,6 +13,8 @@ router.post("/processing-options", authorize, datasetController.selectOptions);
 router.post("/grant-access", authorize, datasetController.grantUserAccess);
 router.post("/generate-insights", authorize, datasetController.generateInsights);
 
+router.post("/clean-dataset", authorize, uploadFile, datasetController.cleanData);
+
 // endpoint to add a new dataset
 // router.post("/upload", authorize, uploadFile, datasetController.upload);
 
