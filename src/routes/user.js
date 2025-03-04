@@ -18,6 +18,6 @@ router.get("/user-data", authorize, userController.getUserDetails);
 router.get('/search', userController.searchUsers);
 
 // endpoint to get user data by id
-router.get('/:id', userController.searchUsers);
+router.get('/:id', userController.getUserDataById);
 
 export default router;
