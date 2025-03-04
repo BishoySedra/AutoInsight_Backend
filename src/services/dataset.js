@@ -42,6 +42,7 @@ export const analyze = async (fileUrl) => {
         kde: [],
         correlation: [],
         summary_report: [],
+        forecast: [],
         others: []
     };
 
@@ -60,6 +61,7 @@ export const analyze = async (fileUrl) => {
         kde: [],
         histogram: [],
         correlation: [],
+        forecast: [],
         others: []
     };
 

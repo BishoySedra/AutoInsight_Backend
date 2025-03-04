@@ -33,6 +33,7 @@ const DatasetSchema = new mongoose.Schema(
             kde: [{ type: String, trim: true }],
             histogram: [{ type: String, trim: true }],
             correlation: [{ type: String, trim: true }],
+            forecast: [{ type: String, trim: true }],
             others: [{ type: String, trim: true }],
         },
     },
