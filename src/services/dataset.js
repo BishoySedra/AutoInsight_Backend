@@ -218,11 +218,12 @@ export const deleteDataset = async (dataset_id, user_id) => {
         throw createCustomError(`Dataset not found`, 404);
     }
 
-    if (dataset.user_id.toString() !== user_id) {
-        throw createCustomError(`You are not the owner of the dataset`, 400);
-    }
+    // if (dataset.user_id.toString() !== user_id) {
+    //     throw createCustomError(`You are not the owner of the dataset`, 400);
+    // }
 
     await dataset.deleteOne();
+    await SharedDataset.deleteMany({ dataset_id });
 };
 
 // Service to give permission to a user to access a dataset
@@ -327,14 +328,14 @@ export const unshare = async (dataset_id, user_id) => {
 export const readPermissions = async (dataset_id) => {
 
     // check if the dataset_id is valid
-    const dataset = await Dataset.findOne({ _id: dataset_id });
-
+    const dataset = await SharedDataset.find({ dataset_id }).select('user_id permission -_id');
+    console.log(dataset);
     // check if the dataset exists
     if (!dataset) {
         throw createCustomError(`Dataset not found`, 404);
     }
 
-    return dataset.permissions;
+    return dataset;
 };
 
 // Service to get all datasets shared with the user

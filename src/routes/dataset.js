@@ -28,17 +28,17 @@ router.get("/shared", authorize, datasetController.readShared);
 // endpoint to read a dataset by id # tested
 router.get("/:dataset_id", authorize, checkPermission("view"), datasetController.readById);
 
-// endpoint to delete a dataset by id
-router.delete("/:dataset_id", authorize, datasetController.deleteDataset);
+// endpoint to delete a dataset by id // admin
+router.delete("/:dataset_id", authorize, checkPermission('admin'), datasetController.deleteDataset);
 
-// endpoint to add permission to a user to access a dataset
-router.post("/:dataset_id/share", authorize, datasetController.share);
+// endpoint to add permission to a user to access a dataset // admin # tested
+router.post("/:dataset_id/share", authorize, checkPermission('admin'), datasetController.share);
 
-// endpoint to delete permission of a user to access a dataset
-router.delete("/:dataset_id/share", authorize, datasetController.unshare);
+// endpoint to delete permission of a user to access a dataset // admin
+router.delete("/:dataset_id/share", authorize, checkPermission('admin'), datasetController.unshare);
 
-// endpoint to read permissions of a dataset
-router.get("/:dataset_id/share", authorize, datasetController.readPermissions);
+// endpoint to read permissions of a dataset // admin # tested
+router.get("/:dataset_id/share", authorize, checkPermission('admin'), datasetController.readPermissions);
 
 
 export default router;
