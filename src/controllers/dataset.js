@@ -256,6 +256,30 @@ export const generateInsights = async (req, res, next) => {
   })(req, res, next);
 }
 
+export const cleanData = (req, res, next) => {
+  wrapper(async (req, res, next) => {
+    const fileUrl = req.file_url;
+    if (!fileUrl) {
+      throw createCustomError('No file uploaded', 400);
+    }
+
+    cleaned_dataset_url = await datasetService.clean(fileUrl);
+
+    // create a new dataset object
+    const dataset = new Dataset({
+      user_id: req.userId,
+      dataset_name: req.file.originalname,
+      dataset_url: fileUrl,
+      cleaned_dataset_url
+    });
+
+    // Save the dataset to the database
+    await dataset.save();
+    return sendResponse(res, dataset, `dataset cleaned successfully`, 201);
+  })(req, res, next);
+}
+
+
 // Controller to read all datasets with pagination
 export const readAll = async (req, res, next) => {
   wrapper(async (req, res, next) => {
