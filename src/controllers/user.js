@@ -57,3 +57,11 @@ export const searchUsers = async (req, res, next) => {
       next(error); // Forward error to your global error handler
     }
   };
+
+export const getUserDataById = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const id = req.params.id;
+        const data = await userService.getUserData(id);
+        sendResponse(res, data, 'user details fetched successfully', 200);
+    })(req, res, next);
+}   
