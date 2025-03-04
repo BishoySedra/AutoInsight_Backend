@@ -288,9 +288,9 @@ export const deleteDataset = async (req, res, next) => {
 // Controller to give permission to a user to access a dataset
 export const share = async (req, res, next) => {
   wrapper(async (req, res, next) => {
-    const { user_id } = req.body;
+    const { user_id, permission } = req.body;
     const { dataset_id } = req.params;
-    await datasetService.share(dataset_id, user_id);
+    await datasetService.share(dataset_id, user_id, permission);
     return sendResponse(res, null, "Dataset shared successfully", 200);
   })(req, res, next);
 }
