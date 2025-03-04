@@ -2,6 +2,7 @@ import * as datasetService from '../services/dataset.js';
 import { wrapper } from "../utils/wrapper.js";
 import { sendResponse } from "../utils/response.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
+import Dataset from '../DB/models/dataset.js';
 
 // Controller to add a new dataset
 export const upload = async (req, res, next) => {
@@ -50,6 +51,8 @@ export const selectDomain = (req, res, next) => {
 
     // Save session
     await req.session.save();
+
+    // console.log("upload data", req.session.uploadData);
 
     return sendResponse(res, {
       domainType,
@@ -101,9 +104,9 @@ export const selectOptions = (req, res) => {
     return sendResponse(res, null, "Invalid processing option selected", 400);
   }
 
-  console.log('Processing options:', analysis_option, downloadAfterCreating);
-  console.log('Session data:', req.session);
-  console.log('upload data:', req.session.uploadData);
+  // console.log('Processing options:', analysis_option, downloadAfterCreating);
+  // console.log('Session data:', req.session);
+  // console.log('upload data:', req.session.uploadData);
 
 
   // Initialize processing options in session data
@@ -123,6 +126,7 @@ export const selectOptions = (req, res) => {
 
   console.log('Processing options step');
   console.log('Session data:', req.session);
+  console.log("=====================================");
 
   return sendResponse(res, {
     nextStep: '/grant-access'
@@ -134,7 +138,6 @@ export const grantUserAccess = (req, res, next) => {
   wrapper(async (req, res, next) => {
 
     const userPermissions = req.body.userPermissions;
-    const user_id = req.userId;
     // [{ userId, 'view'}, { userId, 'admin'}, { userId, 'edit '}]
 
     // Validate that we have session data from previous steps
@@ -149,6 +152,7 @@ export const grantUserAccess = (req, res, next) => {
 
     // Validate each user permission entry
     const validPermissionTypes = ['view', 'edit', 'admin'];
+
     for (const entry of userPermissions) {
       if (!entry.userId || !entry.permission) {
         throw createCustomError('Each user permission entry must contain userId and permission', 400);
@@ -162,10 +166,7 @@ export const grantUserAccess = (req, res, next) => {
     // Update session with access information
     req.session.uploadData = {
       ...req.session.uploadData,
-      userAccess: {
-        userPermissions,
-        owner: user_id
-      },
+      userPermissions,
       step: 'access-granted'
     };
 
@@ -194,8 +195,8 @@ export const grantUserAccess = (req, res, next) => {
         responseData.nextStep = '/processing-options';
       }
     }
-    console.log(req.session.uploadData);
-    console.log(req.session.uploadData.userAccess);
+    // console.log(req.session.uploadData);
+    // console.log(req.session.uploadData.userAccess);
 
     return sendResponse(res, responseData, "Access permissions saved successfully", 200);
   })(req, res, next);
@@ -205,85 +206,55 @@ export const grantUserAccess = (req, res, next) => {
 export const generateInsights = async (req, res, next) => {
   wrapper(async (req, res) => {
 
-    const { uploadData } = req.session;
-    console.log(uploadData);
-    // user_id: '67b673095e4d0a6c618b5c71', --> done!
-    // domainType: 'ecommerce',
-    // step: 'access-granted',
-    // timestamp: '2025-03-01T01:25:36.703Z',
-    // fileUrl: 'https://res.cloudinary.com/dwd6kau8a/raw/upload/v1740792348/ceivo0ba3quso76xe0jf.csv', --> done!
-    // status: 'pending',
-    // processingOptions: {
-    //   analysis_option: 'clean_and_generate',
-    //   downloadAfterCreating: true --> done!
-    // },
-    // userAccess: { userPermissions: [Array], owner: '67b673095e4d0a6c618b5c71' } --> done!
-
-    const analysis_option = uploadData.processingOptions.analysis_option;
-
-    // Pass all collected data to your analysis service
-    let dataset = await datasetService.clean(
-      req.userId,
-      {
-        dataset_name: uploadData.dataset_name,
-        domainType: uploadData.domainType,
-        downloadOption: uploadData.processingOptions.downloadAfterCreating,
-        userAccess: uploadData.userAccess,
-        fileUrl: uploadData.fileUrl
-      },
-
-    );
-
-    if (analysis_option === 'clean_and_generate') {
-      dataset = await datasetService.analyze(
-        req.userId,
-        {
-          dataset_id: dataset._id,
-          cleaned_dataset_url: dataset.cleaned_dataset_url,
-          dataset_name: uploadData.dataset_name,
-          fileUrl: uploadData.fileUrl,
-          domainType: uploadData.domainType,
-          processingOptions: uploadData.processingOptions,
-          userAccess: uploadData.userAccess // userAccess.users, .permissions, .owner
-        }
-      );
-    }
-
-    // loop on this array uploadData.userAccess.userPermissionsw
-    // for each user, create a new entry in the permissions collection
-
-    // create a new entry in the permissions collection
-    // {
-    //   dataset_id: dataset._id,
-    //   user_id: user_id,
-    //   permission: permission
-    // }
-
-    // create a new entry in the shared_usernames collection
-
-    // for (const userPermission of uploadData.userAccess.userPermissions) {
-    //   await datasetService.share(dataset._id, userPermission.userId, userPermission.permission);
-    // }
-
-    // if (uploadData.processingOptions.downloadAfterCreating) {
-    //   await datasetService.download(dataset._id);
-    // }
-
-    // save the dataset to the database
-    await dataset.save();
-
-    // Clear session data after successful processing
-    const downloadAfterCreating = uploadData.processingOptions.downloadAfterCreating;
-    req.session.uploadData = null;
-
-    console.log('Insights generated step');
+    console.log('Generate insights step');
     console.log('Session data:', req.session);
     console.log("=====================================");
 
-    return sendResponse(res, { dataset, downloadAfterCreating, analysis_option }, "Dataset analyzed successfully", 201);
+    // Validate that we have session data from previous steps
+    const { uploadData } = req.session;
+
+    console.log(uploadData);
+
+    const { analysis_option } = uploadData.processingOptions;
+    const { fileUrl } = uploadData;
+
+    // step(1) clean the dataset if the option is clean_only
+    let cleaned_dataset_url;
+    if (analysis_option === 'clean_only') {
+      cleaned_dataset_url = await datasetService.clean(fileUrl);
+    }
+
+    // step(2) generate insights if the option is clean_and_generate
+    let insights_urls;
+    if (analysis_option === 'clean_and_generate') {
+      insights_urls = await datasetService.analyze(fileUrl);
+    }
+
+    // create a new dataset object
+    const dataset = new Dataset({
+      user_id: req.userId,
+      dataset_name: uploadData.dataset_name,
+      dataset_url: fileUrl,
+      cleaned_dataset_url: cleaned_dataset_url || null,
+      insights_urls: insights_urls || {}
+    });
+
+    // Save the dataset to the database
+    await dataset.save();
+
+    // step(3) share the dataset with the users if there are userPermissions in uploadData
+    if (uploadData.userPermissions) {
+      for (const entry of uploadData.userPermissions) {
+        await datasetService.share(dataset._id, entry.userId, entry.permission);
+      }
+    }
+
+    // Clear session data
+    req.session.destroy();
+
+    return sendResponse(res, dataset, "Dataset analyzed successfully", 201);
   })(req, res, next);
 }
-
 
 // Controller to read all datasets with pagination
 export const readAll = async (req, res, next) => {

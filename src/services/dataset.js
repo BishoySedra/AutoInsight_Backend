@@ -10,11 +10,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Service to add a new dataset
-export const analyze = async (user_id, datasetData) => {
-
-
-    // get the dataset url
-    const { fileUrl, dataset_id, userAccess, dataset_name } = datasetData;
+export const analyze = async (fileUrl) => {
 
     // check if the dataset url is provided
     if (!fileUrl) {
@@ -99,24 +95,22 @@ export const analyze = async (user_id, datasetData) => {
             }
         }
     }
+
     console.log('Uploaded Images:', uploadedImages);
-    const dataset = new Dataset({ dataset_id, dataset_url: fileUrl, insights_urls: uploadedImages, dataset_name, user_id });
+    // const dataset = new Dataset({ dataset_id, dataset_url: fileUrl, insights_urls: uploadedImages, dataset_name, user_id });
     // await dataset.save();
 
     // looping through userAccess to grant access to the dataset to the users
-    if (Array.isArray(userAccess) && userAccess.length > 0) {
-        for (let i = 0; i < userAccess.length; i++)
-            await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
-    }
+    // if (Array.isArray(userAccess) && userAccess.length > 0) {
+    //     for (let i = 0; i < userAccess.length; i++)
+    //         await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+    // }
 
-    return dataset;
+    return uploadedImages;
 };
 
 // Service to clean a dataset
-export const clean = async (user_id, datasetData) => {
-
-    // get the dataset url
-    const { fileUrl, dataset_name, userAccess } = datasetData;
+export const clean = async (fileUrl) => {
 
     // check if the dataset url is provided
     if (!fileUrl) {
@@ -126,6 +120,7 @@ export const clean = async (user_id, datasetData) => {
     const FASTAPI_URL = process.env.FASTAPI_URL;
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
 
+    // make a request to the FastAPI server to clean the dataset
     const response = await axios.post(`${FASTAPI_URL}/clean-data`,
         { cloudinary_url: fileUrl, filter_number: 10 }, {
         headers: {
@@ -136,24 +131,32 @@ export const clean = async (user_id, datasetData) => {
         maxBodyLength: Infinity
     });
 
-    console.log(response.data);
-
-    const dataset = new Dataset({
-        user_id,
-        dataset_name,
-        dataset_url: fileUrl,
-        cleaned_dataset_url: response.data.cleaned_csv
-    });
-
-    // await dataset.save();
-
-    // looping through userAccess to grant access to the dataset to the users
-    if (Array.isArray(userAccess) && userAccess.length > 0) {
-        for (let i = 0; i < userAccess.length; i++)
-            await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
+    // check if the response is valid
+    if (!response.data?.cleaned_csv) {
+        throw createCustomError("Invalid response format from cleaning service", 500);
     }
 
-    return dataset;
+    // getting the cleaned dataset url from the response
+    const { cleaned_csv } = response.data;
+
+    // console.log(response.data);
+
+    // const dataset = new Dataset({
+    //     user_id,
+    //     dataset_name,
+    //     dataset_url: fileUrl,
+    //     cleaned_dataset_url: response.data.cleaned_csv
+    // });
+
+    // // await dataset.save();
+
+    // // looping through userAccess to grant access to the dataset to the users
+    // if (Array.isArray(userAccess) && userAccess.length > 0) {
+    //     for (let i = 0; i < userAccess.length; i++)
+    //         await share(dataset._id, userAccess[i].userId, userAccess[i].permission);
+    // }
+
+    return cleaned_csv;
 };
 
 // Service to read all datasets with pagination
@@ -246,21 +249,37 @@ export const share = async (dataset_id, user_id, permission) => {
         throw createCustomError(`User not found`, 404);
     }
 
-    // check if the username is already in the shared_usernames list
-    dataset.shared_usernames.push(user.username);
+    // check if the username is already in the shared_usernames list before adding it
+    if (!dataset.shared_usernames.includes(user.username)) {
+        // add the user_id to the permissions list
+        dataset.shared_usernames.push(user.username);
 
-    // add the dataset_id and user_id to the shared_datasets collection
-    const sharedDataset = new SharedDataset({
-        dataset_id,
-        user_id,
-        permission
-    });
+        // save the updated dataset
+        await dataset.save();
+    }
 
-    // save the shared dataset
-    await sharedDataset.save();
+    // check if the user_id has already been shared the dataset
+    const sharedDataset = await SharedDataset.findOne({ dataset_id, user_id });
 
-    // save the updated dataset
-    await dataset.save();
+    if (sharedDataset) {
+        // check if the permission is already the same
+        if (sharedDataset.permission === permission) {
+            throw createCustomError(`User already has ${permission} permission`, 400);
+        } else {
+            sharedDataset.permission = permission;
+            await sharedDataset.save();
+        }
+    } else {
+        // add the dataset_id and user_id to the shared_datasets collection
+        const sharedDataset = new SharedDataset({
+            dataset_id,
+            user_id,
+            permission
+        });
+
+        // save the shared dataset
+        await sharedDataset.save();
+    }
 };
 
 // Service to delete permission of a user to access a dataset
@@ -279,13 +298,12 @@ export const unshare = async (dataset_id, user_id) => {
         throw createCustomError(`You are the owner of the dataset`, 400);
     }
 
-    // check if the user_id is already in the permissions list
-    if (!dataset.permissions.includes(user_id)) {
+    // check if the user_id has already been shared the dataset
+    const sharedDataset = await SharedDataset.findOne({ dataset_id, user_id });
+
+    if (!sharedDataset) {
         throw createCustomError(`User does not have access to the dataset`, 400);
     }
-
-    // remove the user_id from the permissions list
-    dataset.permissions = dataset.permissions.filter(permission => permission.toString() !== user_id);
 
     // remove the username using the user_id from the shared_usernames list
     const user = await User.findById(user_id);
@@ -298,11 +316,11 @@ export const unshare = async (dataset_id, user_id) => {
     // remove the username from the shared_usernames list
     dataset.shared_usernames = dataset.shared_usernames.filter(username => username !== user.username);
 
-    // remove the dataset_id and user_id from the shared_datasets collection
-    await SharedDataset.deleteOne({ dataset_id, user_id });
-
     // save the updated dataset
     await dataset.save();
+
+    // remove the dataset_id and user_id from the shared_datasets collection
+    await SharedDataset.deleteOne({ dataset_id, user_id });
 };
 
 // Service to read permissions of a dataset
