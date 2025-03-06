@@ -21,6 +21,9 @@ router.post("/clean-dataset", authorize, uploadFile, datasetController.cleanData
 // endpoint to read all datasets with pagination
 router.get("/", authorize, datasetController.readAll);
 
+// endpoint to read all shared datasets with pagination
+router.get("/shared", authorize, datasetController.readAllShared);
+
 // # tested
 router.patch("/:dataset_id", authorize, checkPermission("edit"), datasetController.editDatasetName);
 

@@ -290,6 +290,15 @@ export const readAll = async (req, res, next) => {
   })(req, res, next);
 }
 
+export const readAllShared = async (req, res, next) => {
+  wrapper(async (req, res, next) => {
+    const user_id = req.userId;
+    const { limit, page } = req.query;
+    const datasets = await datasetService.readAllShared(user_id, limit, page);
+    return sendResponse(res, datasets, "Datasets read successfully", 200);
+  })(req, res, next);
+}
+
 // Controller to read a dataset by id
 export const readById = async (req, res, next) => {
   wrapper(async (req, res, next) => {

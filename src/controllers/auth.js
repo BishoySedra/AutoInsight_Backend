@@ -23,7 +23,7 @@ export const loginUser = async (req, res, next) => {
 export const forgetPassword = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const { email } = req.body;
-        const resetToken = await authService.generatePasswordResetToken(email);        
+        const resetToken = await authService.generatePasswordResetToken(email);    
         return sendResponse(res, {}, "If a user with that email exists, a password reset link has been sent", 200);
     })(req, res, next);
 };

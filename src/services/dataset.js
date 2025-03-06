@@ -189,6 +189,15 @@ export const readAll = async (user_id, limit, page) => {
         user
     };
 };
+export const readAllShared = async (user_id, limit, page) => {
+
+    const limitPerPage = parseInt(limit) || 10;
+    const pageNumber = parseInt(page) || 1;
+    const skip = (pageNumber - 1) * limitPerPage;
+    const datasets = await SharedDataset.find({ user_id }).skip(skip).limit(limitPerPage);
+
+    return datasets;
+};
 
 // Service to read a dataset by id
 export const readById = async (dataset_id) => {
