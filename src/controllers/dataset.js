@@ -263,7 +263,7 @@ export const cleanData = (req, res, next) => {
       throw createCustomError('No file uploaded', 400);
     }
 
-    cleaned_dataset_url = await datasetService.clean(fileUrl);
+    const cleaned_dataset_url = await datasetService.clean(fileUrl);
 
     // create a new dataset object
     const dataset = new Dataset({
