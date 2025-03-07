@@ -35,6 +35,7 @@ export const analyze = async (fileUrl) => {
     }
     // getting images inside the response
     const images = response.data.images;
+    const cleaned_dataset_url = response.data.cleaned_csv;
     const classifiedImages = {
         pie_chart: [],
         bar_chart: [],
@@ -108,7 +109,7 @@ export const analyze = async (fileUrl) => {
     //         await share(dataset._id, userAccess[i].user_id, userAccess[i].permission);
     // }
 
-    return uploadedImages;
+    return { uploadedImages, cleaned_dataset_url };
 };
 
 // Service to clean a dataset
@@ -132,7 +133,7 @@ export const clean = async (fileUrl) => {
         timeout: 300000, // 5 minutes
         maxBodyLength: Infinity
     });
-
+    console.log(response);
     // check if the response is valid
     if (!response.data?.cleaned_csv) {
         throw createCustomError("Invalid response format from cleaning service", 500);

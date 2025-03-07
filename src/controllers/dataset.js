@@ -225,18 +225,20 @@ export const generateInsights = async (req, res, next) => {
     }
 
     // step(2) generate insights if the option is clean_and_generate
-    let insights_urls;
+    let data;
     if (analysis_option === 'clean_and_generate') {
-      insights_urls = await datasetService.analyze(fileUrl);
+      data = await datasetService.analyze(fileUrl);
     }
 
+    const uploadedImages = data.uploadedImages;
+    cleaned_dataset_url = data.cleaned_dataset_url;
     // create a new dataset object
     const dataset = new Dataset({
       user_id: req.userId,
       dataset_name: uploadData.dataset_name,
       dataset_url: fileUrl,
       cleaned_dataset_url: cleaned_dataset_url || null,
-      insights_urls: insights_urls || {}
+      insights_urls: uploadedImages || {}
     });
 
     // Save the dataset to the database
