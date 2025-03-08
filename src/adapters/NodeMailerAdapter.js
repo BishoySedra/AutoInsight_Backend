@@ -1,4 +1,5 @@
 // Email provider implementation (Adapter pattern)
+import nodemailer from 'nodemailer';
 export class NodemailerAdapter {
   constructor() {
       // Lazy initialization
@@ -7,26 +8,34 @@ export class NodemailerAdapter {
   
   get transporter() {
       if (!this._transporter) {
-          this._transporter = require('nodemailer').createTransport({
-              service: config.email.service,
+          console.log(process.env.EMAIL_USERNAME)
+          console.log(process.env.EMAIL_PASSWORD)
+          this._transporter = nodemailer.createTransport({
+              service: 'gmail',
               auth: {
-                  user: config.email.username,
-                  pass: config.email.password
+                  user: process.env.EMAIL_USERNAME,
+                  pass: process.env.EMAIL_PASSWORD
               },
               tls: {
                   rejectUnauthorized: false // In production, set to true
               }
           });
-      }
+        }
       return this._transporter;
   }
   
   async sendMail(options) {
-      const mailOptions = {
-          from: config.email.username,
-          ...options
-      };
-      
-      return await this.transporter.sendMail(mailOptions);
-  }
+    try {
+        const mailOptions = {
+            from: process.env.EMAIL_USERNAME,
+            ...options
+        };
+        
+        const result =  await this.transporter.sendMail(mailOptions);
+        return result;
+    }
+      catch (err) {
+        console.log('error sending email', err.message);
+      }
+    }
 }

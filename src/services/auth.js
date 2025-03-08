@@ -119,7 +119,6 @@ export const generatePasswordResetToken = async (email) => {
         const emailProvider = new NodemailerAdapter();
         const emailService = new EmailService(emailProvider);
         await emailService.sendPasswordResetEmail(user.email, resetToken);
-        
         // logger.info(`Password reset process initiated for user: ${user._id}`);
         
         return resetToken;

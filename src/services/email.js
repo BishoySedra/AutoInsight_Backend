@@ -6,11 +6,10 @@ export class EmailService {
     
     async sendPasswordResetEmail(email, resetToken) {
         try {
-            const resetUrl = `${config.frontendUrl}/reset-password/${resetToken}`;
-            
+            // const resetUrl = `${config.frontendUrl}/reset-password/${resetToken}`;
+            const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
             const emailTemplate = this.getPasswordResetTemplate(resetUrl);
-            
-            await this.emailProvider.sendMail({
+            const result = await this.emailProvider.sendMail({
                 to: email,
                 subject: 'Password Reset Request',
                 html: emailTemplate
