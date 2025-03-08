@@ -225,13 +225,13 @@ export const generateInsights = async (req, res, next) => {
     }
 
     // step(2) generate insights if the option is clean_and_generate
-    let data;
+    let data, uploadedImages;
     if (analysis_option === 'clean_and_generate') {
       data = await datasetService.analyze(fileUrl);
+      uploadedImages = data.uploadedImages;
+      cleaned_dataset_url = data.cleaned_dataset_url;
     }
 
-    const uploadedImages = data.uploadedImages;
-    cleaned_dataset_url = data.cleaned_dataset_url;
     // create a new dataset object
     const dataset = new Dataset({
       user_id: req.userId,
