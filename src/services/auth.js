@@ -145,6 +145,7 @@ export const resetPassword = async (token, newPassword) => {
         // Update password and clear reset token fields
         const hashedPassword = await hashingOperations.hashPassword(newPassword);
         user.password = hashedPassword;
+        await user.save();  
         await TokenRepository.clearResetToken(user._id);
         
         // logger.info(`Password reset successfully for user: ${user._id}`);
