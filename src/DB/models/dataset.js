@@ -29,7 +29,10 @@ const DatasetSchema = new mongoose.Schema(
         ],
         insights_urls: {
             pie_chart: [{ type: String, trim: true }],
-            bar_chart: [{ type: String, trim: true }],
+            bar_chart: [{
+                url: { type: String, trim: true }, 
+                filterNumber: { type: Number, required: true } 
+            }],
             kde: [{ type: String, trim: true }],
             histogram: [{ type: String, trim: true }],
             correlation: [{ type: String, trim: true }],

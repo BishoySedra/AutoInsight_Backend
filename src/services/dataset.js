@@ -19,16 +19,17 @@ export const analyze = async (fileUrl) => {
 
     const FASTAPI_URL = process.env.FASTAPI_URL;
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
-
+    console.log('here 1')
     const response = await axios.post(`${FASTAPI_URL}/analyze-data`,
         { cloudinary_url: fileUrl }, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        timeout: 300000, // 5 minutes
-        maxBodyLength: Infinity
-    });
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            timeout: 300000, // 5 minutes
+            maxBodyLength: Infinity
+        });
+    console.log('here 2')
 
     if (!response.data?.images || !Array.isArray(response.data.images)) {
         throw createCustomError("Invalid response format from analysis service", 500);
@@ -47,13 +48,26 @@ export const analyze = async (fileUrl) => {
         others: []
     };
 
-    images.forEach(([base64Image, plotType]) => {
-        if (classifiedImages.hasOwnProperty(plotType)) {
-            classifiedImages[plotType].push(base64Image);
+    images.forEach((item) => {
+        // Check if this is a bar_chart (which has 3 elements)
+        if (item[1] === "bar_chart") {
+            const [base64Image, plotType, filterNumber] = item;
+            classifiedImages[plotType].push({
+                url: base64Image,
+                filterNumber: filterNumber
+            });
         } else {
-            classifiedImages.others.push(base64Image);
+            // Handle other plot types (2 elements)
+            const [base64Image, plotType] = item;
+            if (classifiedImages.hasOwnProperty(plotType)) {
+                classifiedImages[plotType].push(base64Image);
+            } else {
+                classifiedImages.others.push(base64Image);
+            }
         }
     });
+
+    
 
     // Step 3: Process and upload images
     const uploadedImages = {
@@ -68,7 +82,14 @@ export const analyze = async (fileUrl) => {
 
     for (const [category, imageArray] of Object.entries(classifiedImages)) {
         for (let i = 0; i < imageArray.length; i++) {
-            const base64Image = imageArray[i];
+            
+            let base64Image, filterNumber;
+            if (category === "bar_chart") {
+                base64Image = imageArray[i].url; // Extract base64 string
+                filterNumber = imageArray[i].filterNumber; // Extract filter number
+            } else {
+                base64Image = imageArray[i]; // For other categories, it's a direct string
+            }
             const base64Data = base64Image.split(';base64,').pop();
 
             if (!base64Data) {
@@ -89,8 +110,14 @@ export const analyze = async (fileUrl) => {
                 });
 
                 // Store the URL in the correct category as an object
-                uploadedImages[category].push(result.secure_url);
-
+                if (category === "bar_chart") {
+                    uploadedImages[category].push({
+                        url: result.secure_url,
+                        filterNumber: filterNumber // Include filter number
+                    });
+                } else {
+                    uploadedImages[category].push(result.secure_url);
+                }
                 // Step 6: Delete local file
                 fs.unlinkSync(filename);
             } catch (uploadError) {
@@ -125,7 +152,7 @@ export const clean = async (fileUrl) => {
 
     // make a request to the FastAPI server to clean the dataset
     const response = await axios.post(`${FASTAPI_URL}/clean-data`,
-        { cloudinary_url: fileUrl, filter_number: 10 }, {
+        { cloudinary_url: fileUrl }, {
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
