@@ -34,9 +34,15 @@ const DatasetSchema = new mongoose.Schema(
                 filterNumber: { type: Number, required: true } 
             }],
             kde: [{ type: String, trim: true }],
-            histogram: [{ type: String, trim: true }],
+            histogram: [{
+                url: { type: String, trim: true }, 
+                filterNumber: { type: Number, required: true } 
+            }],
             correlation: [{ type: String, trim: true }],
-            forecast: [{ type: String, trim: true }],
+            forecast: [{
+                url: { type: String, trim: true }, 
+                filterNumber: { type: Number, required: true } 
+            }],
             others: [{ type: String, trim: true }],
         },
     },

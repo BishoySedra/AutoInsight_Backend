@@ -50,7 +50,7 @@ export const analyze = async (fileUrl) => {
 
     images.forEach((item) => {
         // Check if this is a bar_chart (which has 3 elements)
-        if (item[1] === "bar_chart") {
+        if (item[1] === "bar_chart" || item[1] === "forecast" || item[1] === "histogram") {
             const [base64Image, plotType, filterNumber] = item;
             classifiedImages[plotType].push({
                 url: base64Image,
@@ -84,7 +84,7 @@ export const analyze = async (fileUrl) => {
         for (let i = 0; i < imageArray.length; i++) {
             
             let base64Image, filterNumber;
-            if (category === "bar_chart") {
+            if (category === "bar_chart" || category === "histogram" || category === "forecast") {
                 base64Image = imageArray[i].url; // Extract base64 string
                 filterNumber = imageArray[i].filterNumber; // Extract filter number
             } else {
@@ -110,7 +110,7 @@ export const analyze = async (fileUrl) => {
                 });
 
                 // Store the URL in the correct category as an object
-                if (category === "bar_chart") {
+                if (category === "bar_chart" || category === "histogram" || category === "forecast") {
                     uploadedImages[category].push({
                         url: result.secure_url,
                         filterNumber: filterNumber // Include filter number
