@@ -37,7 +37,7 @@ router.get("/:dataset_id", authorize, checkPermission("view"), datasetController
 router.delete("/:dataset_id", authorize, checkPermission('admin'), datasetController.deleteDataset);
 
 // endpoint to add permission to a user to access a dataset // admin # tested
-router.post("/:dataset_id/share", authorize, checkPermission('admin'), datasetController.share);
+router.post("/:dataset_id/share", authorize, checkPermission('edit'), datasetController.share);
 
 // endpoint to delete permission of a user to access a dataset // admin
 router.delete("/:dataset_id/share", authorize, checkPermission('admin'), datasetController.unshare);
