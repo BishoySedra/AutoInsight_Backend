@@ -43,7 +43,7 @@ router.post("/:dataset_id/share", authorize, checkPermission('edit'), datasetCon
 router.delete("/:dataset_id/share", authorize, checkPermission('admin'), datasetController.unshare);
 
 // endpoint to read permissions of a dataset // admin # tested
-router.get("/:dataset_id/share", authorize, checkPermission('admin'), datasetController.readPermissions);
+router.get("/:dataset_id/share", authorize, checkPermission('edit'), datasetController.readPermissions);
 
 
 export default router;
