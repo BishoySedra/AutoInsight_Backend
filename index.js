@@ -7,7 +7,7 @@ import cors from "cors";
 import session from 'express-session';
 
 // import csurf from "csurf";
-import connectDB from "./src/DB/config.js";
+// import connectDB from "./src/DB/config.js";
 import authRouter from "./src/routes/auth.js";
 import fileRouter from "./src/routes/file.js";
 import reviewRouter from "./src/routes/review.js";
