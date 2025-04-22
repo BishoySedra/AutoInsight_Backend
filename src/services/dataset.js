@@ -418,3 +418,19 @@ export const editDatasetName = async (dataset_id, user_id, dataset_name) => {
     // save the updated dataset
     await dataset.save();
 }
+
+
+export const getNumberOfCleanedDatasets = async () => {
+    const totalCount = await Dataset.countDocuments();
+    return totalCount;
+}
+
+export const getNumberOfGeneratedDashboards = async () => {
+    const count = await Dataset.countDocuments({
+        $or: [
+          { 'insights_urls.kde.0': { $exists: true } },
+          { 'insights_urls.correlation.0': { $exists: true } },
+        ]
+      });
+    return count;
+}

@@ -26,6 +26,13 @@ export const getAllReviews = async (req, res, next) => {
     })(req, res, next);
 };
 
+export const getReviewsCounts = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const counts = await reviewService.getAllReviews();
+        return sendResponse(res, counts, "Counts fetched successfully", 200);
+    })(req, res, next);
+};
+
 // Controller to get a review by ID
 export const getReviewById = async (req, res, next) => {
     wrapper(async (req, res, next) => {
