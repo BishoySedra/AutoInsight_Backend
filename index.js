@@ -5,7 +5,6 @@ import xss from "xss-clean";
 import helmet from "helmet";
 import cors from "cors";
 import session from 'express-session';
-
 // import csurf from "csurf";
 import connectDB from "./src/DB/config.js";
 import authRouter from "./src/routes/auth.js";
@@ -70,12 +69,16 @@ app.use(`${baseUrl}/chatbot`, chatbotRouter);
 app.use(errorHandler);
 app.use(notFoundHandler);
 
+
+
 // Start the Express server
 try {
   app.listen(process.env.PORT, async () => {
     console.log(`Server started on http://localhost:${process.env.PORT}`);
   });
   await connectDB();
+
 } catch (error) {
   console.error("Error starting server: ", error);
 }
+
