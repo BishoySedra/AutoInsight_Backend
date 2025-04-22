@@ -1,8 +1,17 @@
 import Review from "../DB/models/review.js";
 import User from "../DB/models/user.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
+import axios from 'axios';
 
 // Service to add a review
+
+export const analyzeSentiment = async (review) => {
+    const response = await axios.post(`${process.env.FASTAPI_URL}/predict-review`, { review });
+    console.log(response.data);
+    // { sentiment: 'negative', confidence: 62.49, sarcasm_detected: false }
+    return response.data;
+}
+
 export const addReview = async (user_id, reviewData) => {
     const { rating, description } = reviewData;
 

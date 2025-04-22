@@ -7,9 +7,14 @@ export const addReview = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const reviewData = req.body;
         const user_id = req.userId;
+        const { description } = reviewData;
+        const sentiment = await reviewService.analyzeSentiment(description);
+        // sentiment = { sentiment: 'negative', confidence: 62.49, sarcasm_detected: false }
+        reviewData.sentiment = sentiment.setiment;
         const review = await reviewService.addReview(user_id, reviewData);
+        console.log(review);
         return sendResponse(res, review, "Review added successfully", 201);
-    })(req, res, next);
+    }) (req, res, next);
 };
 
 // Controller to get all reviews using pagination

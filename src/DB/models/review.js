@@ -24,7 +24,7 @@ const reviewSchema = new mongoose.Schema(
         },
         sentiment: {
             type: String,
-            enum: ['negative', 'positive', 'neutral'] // Enum defining allowed values for the 'role' field
+            enum: ['negative', 'positive', 'neutral']
         },
     },
     { timestamps: true }
