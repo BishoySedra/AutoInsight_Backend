@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "dev:db": "docker compose up -d",
+    "dev:db:stop": "docker compose down",
+    "dev:db:restart": "docker compose restart"
   },
   "keywords": [],
   "author": "",
