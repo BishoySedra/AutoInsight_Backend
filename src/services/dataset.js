@@ -10,7 +10,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Service to add a new dataset
-export const analyze = async (fileUrl) => {
+export const analyze = async (fileUrl, domainType) => {
 
     // check if the dataset url is provided
     if (!fileUrl) {
@@ -21,7 +21,7 @@ export const analyze = async (fileUrl) => {
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
     console.log('here 1')
     const response = await axios.post(`${FASTAPI_URL}/analyze-data`,
-        { cloudinary_url: fileUrl }, {
+        { cloudinary_url: fileUrl, domainType}, {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
@@ -52,10 +52,11 @@ export const analyze = async (fileUrl) => {
         // Check if this is a bar_chart (which has 3 elements)
         if (item[1] === "bar_chart" || item[1] === "forecast" || item[1] === "histogram") {
             const [base64Image, plotType, filterNumber] = item;
-            classifiedImages[plotType].push({
-                url: base64Image,
-                filterNumber: filterNumber
-            });
+            const imageData = { url: base64Image };
+            if (filterNumber)
+                imageData.filterNumber = filterNumber;
+            classifiedImages[plotType].push(imageData);
+
         } else {
             // Handle other plot types (2 elements)
             const [base64Image, plotType] = item;

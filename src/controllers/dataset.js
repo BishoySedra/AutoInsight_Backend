@@ -22,7 +22,7 @@ export const selectDomain = (req, res, next) => {
     const user_id = req.userId;
 
     // Validate domain type
-    const validDomains = ['ecommerce', 'HR'];
+    const validDomains = ['ecommerce', 'education'];
     if (!validDomains.includes(domainType)) {
       throw createCustomError('Invalid domain type selected', 400);
     }
@@ -216,7 +216,7 @@ export const generateInsights = async (req, res, next) => {
     console.log(uploadData);
 
     const { analysis_option } = uploadData.processingOptions;
-    const { fileUrl } = uploadData;
+    const { fileUrl, domainType } = uploadData;
 
     // step(1) clean the dataset if the option is clean_only
     let cleaned_dataset_url;
@@ -227,7 +227,7 @@ export const generateInsights = async (req, res, next) => {
     // step(2) generate insights if the option is clean_and_generate
     let data, uploadedImages;
     if (analysis_option === 'clean_and_generate') {
-      data = await datasetService.analyze(fileUrl);
+      data = await datasetService.analyze(fileUrl, domainType);
       uploadedImages = data.uploadedImages;
       cleaned_dataset_url = data.cleaned_dataset_url;
     }
