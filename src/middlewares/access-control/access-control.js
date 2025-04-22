@@ -4,10 +4,12 @@ import { createCustomError } from "../errors/customError.js";
 
 const checkPermission = (requiredPermission) => async (req, res, next) => {
     try {
+
         const { dataset_id } = req.params;
         console.log("dataset_id", dataset_id);
         const userId = req.userId;
         console.log("userId", userId);
+
         // Check if the dataset exists
         const dataset = await Dataset.findById(dataset_id);
 
