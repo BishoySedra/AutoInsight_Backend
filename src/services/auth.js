@@ -15,11 +15,11 @@ class TokenFactory {
     static createResetToken() {
         return crypto.randomBytes(32).toString('hex');
     }
-    
+
     static hashToken(token) {
         return crypto.createHash('sha256').update(token).digest('hex');
     }
-  }
+}
 
 export const signUpUser = async (userData) => {
     // destructuring the userData object
@@ -100,27 +100,27 @@ export const generatePasswordResetToken = async (email) => {
     try {
         // Find user by email
         const user = await User.findOne({ email });
-        
+
         // For security, don't reveal if user doesn't exist
         if (!user) {
             // logger.info(`Password reset attempted for non-existent email: ${email}`);
             return null; // Still return as successful to the controller
         }
-        
+
         // Generate and hash token
         const resetToken = TokenFactory.createResetToken();
         const hashedToken = TokenFactory.hashToken(resetToken);
-        
+
         // Save to repository
         const expiryTime = Date.now() + config.security.tokenExpiry;
         await TokenRepository.saveResetToken(user._id, hashedToken, expiryTime);
-        
+
         // Send email using Dependency Injection
         const emailProvider = new NodemailerAdapter();
         const emailService = new EmailService(emailProvider);
         await emailService.sendPasswordResetEmail(user.email, resetToken);
         // logger.info(`Password reset process initiated for user: ${user._id}`);
-        
+
         return resetToken;
     } catch (error) {
         // logger.error(`Password reset error: ${error.message}`);
@@ -133,21 +133,21 @@ export const resetPassword = async (token, newPassword) => {
     try {
         // Hash the token from the URL
         const hashedToken = TokenFactory.hashToken(token);
-        
+
         // Find user with the token using repository
         const user = await TokenRepository.findUserByResetToken(hashedToken);
-        
+
         if (!user) {
             // logger.warn('Invalid or expired password reset token used');
             throw new Error('Invalid or expired token');
         }
-        
+
         // Update password and clear reset token fields
         const hashedPassword = await hashingOperations.hashPassword(newPassword);
         user.password = hashedPassword;
-        await user.save();  
+        await user.save();
         await TokenRepository.clearResetToken(user._id);
-        
+
         // logger.info(`Password reset successfully for user: ${user._id}`);
         return true;
     } catch (error) {
@@ -155,3 +155,22 @@ export const resetPassword = async (token, newPassword) => {
         throw new Error(error.message || 'Failed to reset password');
     }
 };
+
+// sign up with different credentials
+export const signUpWithGoogle = async (userData) => {
+    // hash the password
+    const hashedPassword = await hashingOperations.hashPassword(userData.password);
+    // create a new user
+    const newUser = new User({
+        username: userData.username,
+        email: userData.email,
+        password: hashedPassword,
+        profile_picture: userData.profile_picture,
+    });
+
+    // save the user to the database
+    await newUser.save();
+
+    // return the user
+    return newUser;
+}
