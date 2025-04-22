@@ -23,6 +23,14 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  country: {
+    type: String,
+    required: true,
+  },
+  job: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,

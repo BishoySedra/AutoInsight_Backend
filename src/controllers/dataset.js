@@ -358,11 +358,25 @@ export const readShared = async (req, res, next) => {
   })(req, res, next);
 }
 
-export const editDatasetName = (req, res, next) => {
+export const editDatasetName = async (req, res, next) => {
   wrapper(async (req, res, next) => {
     const { dataset_id } = req.params;
     const { dataset_name } = req.body;
     const dataset = await datasetService.editDatasetName(dataset_id, req.userId, dataset_name);
     return sendResponse(res, dataset, "Dataset name edited successfully", 200);
+  })(req, res, next);
+}
+
+export const getNumberOfDatasetsCleaned = async (req, res, next) => {
+  wrapper(async (req, res, next) => {
+    const count = await datasetService.getNumberOfDatasetsCleaned();
+    return sendResponse(res, count, "Number of datasets cleaned successfully", 200);
+  })(req, res, next);
+}
+
+export const getNumberOfGeneratedDashboards = async (req, res, next) => {
+  wrapper(async (req, res, next) => {
+    const count = await datasetService.getNumberOfGeneratedDashboards();
+    return sendResponse(res, count, "Number of datasets cleaned successfully", 200);
   })(req, res, next);
 }

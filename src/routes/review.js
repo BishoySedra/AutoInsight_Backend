@@ -10,6 +10,8 @@ router.post("/", authorize, reviewController.addReview);
 // endpoint to get all reviews using pagination
 router.get("/", reviewController.getAllReviews);
 
+router.get("/reviews_stats", reviewController.getReviewsCounts);
+
 // endpoint to get a review by ID
 router.get("/:id", authorize, reviewController.getReviewById);
 

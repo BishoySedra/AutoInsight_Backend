@@ -15,7 +15,10 @@ const connectDB = async () => {
     let connected_url = mongo_url;
 
     if (connected_url === local_url) {
-      await mongoose.connect(connected_url);
+      await mongoose.connect(connected_url, {
+        serverSelectionTimeoutMS: 60000,
+        connectTimeoutMS: 60000
+      });
       console.log('MongoDB connected successfully locally!');
     } else {
       await mongoose.connect(connected_url);
