@@ -11,8 +11,10 @@ router.post("/signup", validate(userSchemas.signUpSchema), authController.signUp
 // route to login a user
 router.post("/login", validate(userSchemas.loginSchema), authController.loginUser);
 
+// route to forgot password
 router.post('/forgot-password', authController.forgetPassword);
 
+// route to reset password
 router.post('/reset-password', authController.resetPassword);
 
 export default router;

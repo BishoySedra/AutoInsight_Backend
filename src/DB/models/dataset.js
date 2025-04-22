@@ -27,21 +27,26 @@ const DatasetSchema = new mongoose.Schema(
                 trim: true,
             },
         ],
+        team_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Team",
+            default: null,
+        },
         insights_urls: {
             pie_chart: [{ type: String, trim: true }],
             bar_chart: [{
-                url: { type: String, trim: true }, 
-                filterNumber: { type: Number, } 
+                url: { type: String, trim: true },
+                filterNumber: { type: Number, }
             }],
             kde: [{ type: String, trim: true }],
             histogram: [{
-                url: { type: String, trim: true }, 
-                filterNumber: { type: Number, } 
+                url: { type: String, trim: true },
+                filterNumber: { type: Number, }
             }],
             correlation: [{ type: String, trim: true }],
             forecast: [{
-                url: { type: String, trim: true }, 
-                filterNumber: { type: Number, } 
+                url: { type: String, trim: true },
+                filterNumber: { type: Number, }
             }],
             others: [{ type: String, trim: true }],
         },
