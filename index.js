@@ -5,14 +5,19 @@ import xss from "xss-clean";
 import helmet from "helmet";
 import cors from "cors";
 import session from 'express-session';
+
 // import csurf from "csurf";
-import connectDB from "./src/DB/config.js";
+// import connectDB from "./src/DB/config.js";
 import authRouter from "./src/routes/auth.js";
 import fileRouter from "./src/routes/file.js";
 import reviewRouter from "./src/routes/review.js";
 import userRouter from "./src/routes/user.js";
 import datasetRouter from "./src/routes/dataset.js";
 import chatbotRouter from "./src/routes/chatbot.js";
+import teamRouter from "./src/routes/team.js";
+
+// import csurf from "csurf";
+import connectDB from "./src/DB/config.js";
 import errorHandler from "./src/middlewares/errors/errorHandler.js";
 import notFoundHandler from "./src/middlewares/errors/notFoundHandler.js";
 
@@ -65,6 +70,7 @@ app.use(`${baseUrl}/reviews`, reviewRouter);
 app.use(`${baseUrl}/users`, userRouter);
 app.use(`${baseUrl}/datasets`, datasetRouter);
 app.use(`${baseUrl}/chatbot`, chatbotRouter);
+app.use(`${baseUrl}/teams`, teamRouter);
 
 app.use(errorHandler);
 app.use(notFoundHandler);

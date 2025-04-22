@@ -37,22 +37,22 @@ async function start() {
   const data = XLSX.utils.sheet_to_json(sheet);
   const validSentiments = ['positive', 'negative', 'neutral'];
   const reviewsWithUser = data.filter(item => item.review && validSentiments.includes(item.sentiment?.toLowerCase().trim()))
-  .map(item => ({
-    sentiment: item.sentiment?.toLowerCase().trim(),
-    description: item.review.trim(),
-    rating: Math.floor(Math.random() * 5) + 1, // Random rating between 1 and 5
-    user_id: new mongoose.Types.ObjectId()
-  }));
-  
+    .map(item => ({
+      sentiment: item.sentiment?.toLowerCase().trim(),
+      description: item.review.trim(),
+      rating: Math.floor(Math.random() * 5) + 1, // Random rating between 1 and 5
+      user_id: new mongoose.Types.ObjectId()
+    }));
+
   try {
     const reviews = await Review.insertMany(reviewsWithUser);
     mongoose.disconnect();
   } catch (er) {
     console.error('Error:', er);
     mongoose.disconnect();
-  }  
+  }
 }
- 
+
 
 
 await start();

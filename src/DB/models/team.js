@@ -1,4 +1,3 @@
-// models/Team.js
 import mongoose from "mongoose";
 
 const TeamSchema = new mongoose.Schema(
@@ -12,25 +11,21 @@ const TeamSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
-        members: [
-            {
-                user_id: {
-                    type: mongoose.Schema.Types.ObjectId,
-                    ref: "User",
-                },
-                permission: {
-                    type: String,
-                    enum: ['view', 'edit', 'admin'],
-                    default: 'view'
-                },
-            },
-        ],
-        datasets: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Dataset",
-            },
-        ],
+        members: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "User",
+            default: []
+        },
+        memberPermission: {
+            type: String,
+            enum: ["view", "edit", "admin"],
+            default: "view",
+        },
+        datasets: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "Dataset",
+            default: []
+        },
     },
     { timestamps: true }
 );

@@ -39,6 +39,7 @@ export const getUserId = async (username, email) => {
     return user._id;
 }
 
+// Service to get user data by user id
 export const getUserData = async (userId) => {
     const user = await User.findById(userId).select("-password");
     if (!user) {
@@ -47,20 +48,22 @@ export const getUserData = async (userId) => {
     return user;
 };
 
+// service to search users by username
 export const searchUsersByUsername = async (username) => {
     try {
-      // Use a case-insensitive regular expression for partial matching
-      const users = await User.find({
-        username: { $regex: username, $options: 'i' }
-      });
-      return users;
+        // Use a case-insensitive regular expression for partial matching
+        const users = await User.find({
+            username: { $regex: username, $options: 'i' }
+        });
+        return users;
     } catch (error) {
-      throw error;
+        throw error;
     }
-  };
+};
 
+// service to get user by email
 export const getUserByEmail = async (email) => {
-    const user = await User.find({email}).select("-password");
+    const user = await User.find({ email }).select("-password");
     if (!user) {
         throw createCustomError(`User not found`, 404);
     }

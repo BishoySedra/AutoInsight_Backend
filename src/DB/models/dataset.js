@@ -27,11 +27,6 @@ const DatasetSchema = new mongoose.Schema(
                 trim: true,
             },
         ],
-        team_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Team",
-            default: null,
-        },
         insights_urls: {
             pie_chart: [{ type: String, trim: true }],
             bar_chart: [{
