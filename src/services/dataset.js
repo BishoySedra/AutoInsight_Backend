@@ -21,14 +21,14 @@ export const analyze = async (fileUrl, domainType) => {
     // console.log('Making request to FastAPI server:', FASTAPI_URL);
     console.log('here 1')
     const response = await axios.post(`${FASTAPI_URL}/analyze-data`,
-        { cloudinary_url: fileUrl, domainType}, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            timeout: 300000, // 5 minutes
-            maxBodyLength: Infinity
-        });
+        { cloudinary_url: fileUrl, domainType }, {
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        timeout: 300000, // 5 minutes
+        maxBodyLength: Infinity
+    });
     console.log('here 2')
 
     if (!response.data?.images || !Array.isArray(response.data.images)) {
@@ -68,7 +68,7 @@ export const analyze = async (fileUrl, domainType) => {
         }
     });
 
-    
+
 
     // Step 3: Process and upload images
     const uploadedImages = {
@@ -83,7 +83,7 @@ export const analyze = async (fileUrl, domainType) => {
 
     for (const [category, imageArray] of Object.entries(classifiedImages)) {
         for (let i = 0; i < imageArray.length; i++) {
-            
+
             let base64Image, filterNumber;
             if (category === "bar_chart" || category === "histogram" || category === "forecast") {
                 base64Image = imageArray[i].url; // Extract base64 string
@@ -218,6 +218,8 @@ export const readAll = async (user_id, limit, page) => {
         user
     };
 };
+
+// Service to read all datasets shared with a user with pagination
 export const readAllShared = async (user_id, limit, page) => {
 
     const limitPerPage = parseInt(limit) || 10;
@@ -397,6 +399,7 @@ export const readShared = async (user_id) => {
     };
 };
 
+// Service to edit a dataset name
 export const editDatasetName = async (dataset_id, user_id, dataset_name) => {
 
     // check if the dataset_id is valid
