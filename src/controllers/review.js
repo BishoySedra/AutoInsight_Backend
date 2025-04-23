@@ -28,7 +28,7 @@ export const getAllReviews = async (req, res, next) => {
 
 export const getReviewsCounts = async (req, res, next) => {
     wrapper(async (req, res, next) => {
-        const counts = await reviewService.getAllReviews();
+        const counts = await reviewService.getReviewsCounts();
         return sendResponse(res, counts, "Counts fetched successfully", 200);
     })(req, res, next);
 };

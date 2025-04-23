@@ -13,7 +13,7 @@ export const analyzeSentiment = async (review) => {
 }
 
 export const getReviewsCounts = async () => {
-    const reviews = await Review.find();
+    const reviews = await Review.find({});
     const result = {
         negative: 0,
         neutral: 0,
@@ -22,7 +22,7 @@ export const getReviewsCounts = async () => {
     reviews.forEach(item => {
         result[item.sentiment]++;
       });
-    return reviews;
+    return result;
 }
 
 export const addReview = async (user_id, reviewData) => {

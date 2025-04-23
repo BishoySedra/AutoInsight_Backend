@@ -3,6 +3,7 @@ import { wrapper } from "../utils/wrapper.js";
 import { sendResponse } from "../utils/response.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
 import Dataset from '../DB/models/dataset.js';
+import * as notificationService from '../services/notification.js';
 
 // Controller to add a new dataset
 export const upload = async (req, res, next) => {
@@ -316,6 +317,8 @@ export const deleteDataset = async (req, res, next) => {
     const user_id = req.userId;
     const { dataset_id } = req.params;
     await datasetService.deleteDataset(dataset_id, user_id);
+    await notificationService.createNotification(user_id,
+    { message: `The dataset with id ${dataset_id} has been deleted` });
     return sendResponse(res, null, "Dataset deleted successfully", 200);
   })(req, res, next);
 }
@@ -326,6 +329,8 @@ export const share = async (req, res, next) => {
     const { user_id, permission } = req.body;
     const { dataset_id } = req.params;
     await datasetService.share(dataset_id, user_id, permission);
+    await notificationService.createNotification(user_id, 
+      { message: `You've been given ${permission} permission to dataset with id ${dataset_id} ` });
     return sendResponse(res, null, "Dataset shared successfully", 200);
   })(req, res, next);
 }
