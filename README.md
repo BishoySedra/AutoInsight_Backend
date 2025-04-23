@@ -109,5 +109,6 @@ The server should be live at: `http://localhost:5000/api/v1/`
 
 ## 🧪 Testing the API
 
-📬 **Postman Collection URL**: `https://documenter.getpostman.com/view/32763635/2sAYQiCo4i`
+📬 **Postman Collection URL**: [Click here to open in Postman](https://documenter.getpostman.com/view/32763635/2sAYQiCo4i)
+
 
