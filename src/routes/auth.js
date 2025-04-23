@@ -2,6 +2,9 @@ import { Router } from "express";
 import * as authController from "../controllers/auth.js";
 import validate from "../middlewares/validation/validate.js";
 import * as userSchemas from "../middlewares/validation/schemas/user.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const router = Router();
 
@@ -16,5 +19,12 @@ router.post('/forgot-password', authController.forgetPassword);
 
 // route to reset password
 router.post('/reset-password', authController.resetPassword);
+
+// Start Google login
+router.get("/google", authController.startLoginWithGoogle);
+
+// Handle callback from Google
+router.get("/google/callback", authController.handleGoogleCallback);
+
 
 export default router;
