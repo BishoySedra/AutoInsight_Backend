@@ -14,6 +14,20 @@ export const signUpSchema = Joi.object({
     "string.email": "Email must be a valid email",
     "any.required": "Email is required",
   }),
+  country: Joi.string().min(2).max(30).required().messages({
+    "string.base": "Country must be a string",
+    "string.empty": "Country cannot be empty",
+    "string.min": "Country must be at least 2 characters",
+    "string.max": "Country must be at most 30 characters",
+    "any.required": "Country is required",
+  }),
+  job: Joi.string().min(2).max(30).required().messages({
+    "string.base": "Job must be a string",
+    "string.empty": "Job cannot be empty",
+    "string.min": "Job must be at least 2 characters",
+    "string.max": "Job must be at most 30 characters",
+    "any.required": "Job is required",
+  }),
   password: Joi.string()
     .pattern(
       new RegExp(

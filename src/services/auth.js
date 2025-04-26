@@ -23,7 +23,7 @@ class TokenFactory {
 
 export const signUpUser = async (userData) => {
     // destructuring the userData object
-    const { username, email, password, confirm_password } = userData;
+    const { username, email, country, job, password, confirm_password } = userData;
 
     // check if the email already exists
     let foundUser = await User.findOne({
@@ -56,6 +56,8 @@ export const signUpUser = async (userData) => {
     const newUser = new User({
         username,
         email,
+        country,
+        job,
         password: hashedPassword,
     });
 
