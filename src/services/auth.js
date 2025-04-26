@@ -162,12 +162,16 @@ export const resetPassword = async (token, newPassword) => {
 export const signUpWithGoogle = async (userData) => {
     // hash the password
     const hashedPassword = await hashingOperations.hashPassword(userData.password);
+
+    // console.log("User data from Google from signUpWithGoogle Service:", userData);
+
+    // getting the user data except password
+    const { password, ...restUserData } = userData;
+
     // create a new user
     const newUser = new User({
-        username: userData.username,
-        email: userData.email,
-        password: hashedPassword,
-        profile_picture: userData.profile_picture,
+        ...restUserData,
+        password: hashedPassword
     });
 
     // save the user to the database

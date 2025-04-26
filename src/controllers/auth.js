@@ -57,7 +57,7 @@ export const startLoginWithGoogle = (req, res, next) => {
 export const handleGoogleCallback = (req, res, next) => {
     passport.authenticate("google", { session: false, failureRedirect: "/login" }, (err, user) => {
         if (err || !user) {
-            return sendResponse(res, {}, "Failed to authenticate user", 401);
+            return sendResponse(res, null, "Failed to authenticate user", 401);
         }
 
         try {
