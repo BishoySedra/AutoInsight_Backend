@@ -159,7 +159,7 @@ export const resetPassword = async (token, newPassword) => {
 };
 
 // sign up with different credentials
-export const signUpWithGoogle = async (userData) => {
+export const signUpWithOAuthProvider = async (userData) => {
     // hash the password
     const hashedPassword = await hashingOperations.hashPassword(userData.password);
 

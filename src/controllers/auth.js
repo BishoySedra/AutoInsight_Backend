@@ -69,3 +69,28 @@ export const handleGoogleCallback = (req, res, next) => {
         }
     })(req, res, next);
 };
+
+// Start login with GitHub
+export const startLoginWithGithub = (req, res, next) => {
+    passport.authenticate("github", { scope: ["user:email"] })(req, res, next);
+};
+
+// Handle callback from GitHub
+export const handleGithubCallback = (req, res, next) => {
+    passport.authenticate("github", { session: false, failureRedirect: "/login" }, (err, user) => {
+
+        // console.log("User data from GitHub:", user);
+
+        if (err || !user) {
+            return sendResponse(res, err, "Failed to authenticate user", 401);
+        }
+
+        try {
+            const token = JWTOps.generateToken({ id: user._id });
+
+            return sendResponse(res, { token }, "User logged in successfully", 200);
+        } catch (error) {
+            next(error);
+        }
+    })(req, res, next);
+};

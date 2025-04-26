@@ -26,5 +26,11 @@ router.get("/google", authController.startLoginWithGoogle);
 // Handle callback from Google
 router.get("/google/callback", authController.handleGoogleCallback);
 
+// Start GitHub login
+router.get("/github", authController.startLoginWithGithub);
+
+// Handle callback from GitHub
+router.get("/github/callback", authController.handleGithubCallback);
+
 
 export default router;
