@@ -171,8 +171,6 @@ The backend uses a **Strategy Pattern** to easily add new OAuth providers with c
 📬 **Postman Collection**:  
 👉 [Click here to open the Postman docs](https://documenter.getpostman.com/view/32763635/2sAYQiCo4i)
 
-(You can import the collection and easily test login, signup, datasets, chatbot, teams, reviews, and more!)
-
 ---
 
 ## 📜 Notes
