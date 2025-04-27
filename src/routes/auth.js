@@ -32,5 +32,11 @@ router.get("/github", authController.startLoginWithGithub);
 // Handle callback from GitHub
 router.get("/github/callback", authController.handleGithubCallback);
 
+// Start Facebook login
+router.get("/facebook", authController.startLoginWithFacebook);
+
+// Handle callback from Facebook
+router.get("/facebook/callback", authController.handleFacebookCallback);
+
 
 export default router;

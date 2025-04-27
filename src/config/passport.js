@@ -114,6 +114,60 @@ const githubVerify = async (accessToken, refreshToken, profile, done) => {
 const githubStrategy = new OAuthStrategy(GitHubStrategy, githubOptions, githubVerify);
 githubStrategy.register();
 
+// ========= Facebook Strategy =========
+import { Strategy as FacebookStrategy } from "passport-facebook";
+
+const facebookOptions = {
+    clientID: process.env.FACEBOOK_CLIENT_ID,
+    clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    callbackURL: process.env.FACEBOOK_CALLBACK_URL
+};
+
+const facebookVerify = async (accessToken, refreshToken, profile, done) => {
+    try {
+        let email = profile.emails?.[0]?.value;
+
+        // If email is not available in profile, fetch it manually
+        if (!email) {
+            const { data } = await axios.get(`https://graph.facebook.com/${profile.id}`, {
+                params: {
+                    fields: 'id,name,email',
+                    access_token: accessToken
+                }
+            });
+            email = data.email;
+        }
+
+        if (!email) {
+            return done(new Error("Email is required but not provided by Facebook"), null);
+        }
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+
+            const userData = {
+                username: profile.displayName || profile.username || "Facebook User",
+                email: email,
+                country: "Not provided",
+                job: "Not provided",
+                password: process.env.FACEBOOK_PASSWORD, // static password
+                profile_picture: profile.photos?.[0]?.value || null,
+            };
+
+            user = await authServices.signUpWithOAuthProvider(userData);
+        }
+
+        return done(null, user);
+    } catch (error) {
+        return done(error, null);
+    }
+};
+
+// Create and register the Facebook Strategy
+const facebookStrategy = new OAuthStrategy(FacebookStrategy, facebookOptions, facebookVerify);
+facebookStrategy.register();
+
 // ========= Common Serialize / Deserialize =========
 passport.serializeUser((user, done) => done(null, user.id));
 

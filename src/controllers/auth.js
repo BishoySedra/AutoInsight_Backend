@@ -94,3 +94,26 @@ export const handleGithubCallback = (req, res, next) => {
         }
     })(req, res, next);
 };
+
+// Start login with Facebook
+export const startLoginWithFacebook = (req, res, next) => {
+    passport.authenticate("facebook")(req, res, next);
+};
+
+// Handle callback from Facebook
+export const handleFacebookCallback = (req, res, next) => {
+    passport.authenticate("facebook", { session: false, failureRedirect: "/login" }, (err, user) => {
+
+        if (err || !user) {
+            return sendResponse(res, null, "Failed to authenticate user", 401);
+        }
+
+        try {
+            const token = JWTOps.generateToken({ id: user._id });
+
+            return sendResponse(res, { token }, "User logged in successfully", 200);
+        } catch (error) {
+            next(error);
+        }
+    })(req, res, next);
+};
