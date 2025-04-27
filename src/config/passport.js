@@ -43,7 +43,7 @@ const googleVerify = async (accessToken, refreshToken, profile, done) => {
                 profile_picture: profile.photos[0]?.value || null,
             };
 
-            console.log("User data from Google:", userData);
+            // console.log("User data from Google:", userData);
 
             user = await authServices.signUpWithOAuthProvider(userData);
         }
