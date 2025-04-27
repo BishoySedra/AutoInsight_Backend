@@ -69,3 +69,8 @@ export const getUserByEmail = async (email) => {
     }
     return user;
 }
+
+export const getNumberOfUsers = async () => {
+    const count = await User.countDocuments({});
+    return count;
+}
