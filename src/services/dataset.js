@@ -425,6 +425,7 @@ export const editDatasetName = async (dataset_id, user_id, dataset_name) => {
 
 export const getNumberOfCleanedDatasets = async () => {
     const totalCount = await Dataset.countDocuments();
+    console.log(totalCount);
     return totalCount;
 }
 

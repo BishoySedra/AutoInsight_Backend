@@ -21,7 +21,8 @@ const connectDB = async () => {
     const local_url = `mongodb+srv://${mongo_username}:${mongo_password}@${mongo_host}/${mongo_db}?retryWrites=true&w=majority`;
 
     let connected_url = mongo_url;
-
+    // const url = `mongodb+srv://mazen:mazen@cluster0.devwr.mongodb.net/AutoInsights?retryWrites=true&w=majority&appName=Cluster0`;
+    // await mongoose.connect(url);
     if (connected_url === local_url) {
       await mongoose.connect(connected_url);
       console.log('MongoDB connected successfully locally!');

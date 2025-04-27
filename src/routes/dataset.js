@@ -6,6 +6,8 @@ import checkPermission from "../middlewares/access-control/access-control.js";
 
 const router = Router();
 
+router.get("/cleaned-datasets-count", authorize, datasetController.getNumberOfDatasetsCleaned);
+router.get("/generated_dashboards_no", authorize, datasetController.getNumberOfGeneratedDashboards);
 
 router.post("/choose-domain", authorize, datasetController.selectDomain);
 router.post("/upload", authorize, uploadFile, datasetController.storeFile);
@@ -45,8 +47,6 @@ router.delete("/:dataset_id/share", authorize, checkPermission('admin'), dataset
 // endpoint to read permissions of a dataset // admin # tested
 router.get("/:dataset_id/share", authorize, checkPermission('edit'), datasetController.readPermissions);
 
-router.get("/cleaned_datasets_no", authorize, datasetController.getNumberOfDatasetsCleaned);
 
-router.get("/generated_dashboards_no", authorize, datasetController.getNumberOfGeneratedDashboards);
 
 export default router;
