@@ -374,7 +374,7 @@ export const editDatasetName = async (req, res, next) => {
 
 export const getNumberOfDatasetsCleaned = async (req, res, next) => {
   wrapper(async (req, res, next) => {
-    const count = await datasetService.getNumberOfDatasetsCleaned();
+    const count = await datasetService.getNumberOfCleanedDatasets();
     return sendResponse(res, count, "Number of datasets cleaned successfully", 200);
   })(req, res, next);
 }
