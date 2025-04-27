@@ -58,6 +58,7 @@ export const searchUsers = async (req, res, next) => {
     }
   };
 
+
 export const getUserDataById = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const id = req.params.id;
@@ -65,3 +66,10 @@ export const getUserDataById = async (req, res, next) => {
         sendResponse(res, data, 'user details fetched successfully', 200);
     })(req, res, next);
 }   
+
+export const getNumberOfUsers = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const data = await userService.getNumberOfUsers();
+        sendResponse(res, data, 'number of users fetched successfully', 200);
+    })(req, res, next);
+}
