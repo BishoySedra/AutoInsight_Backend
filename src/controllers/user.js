@@ -3,6 +3,15 @@ import { wrapper } from "../utils/wrapper.js";
 import { sendResponse } from "../utils/response.js";
 
 
+
+// Controller to get users per month
+export const getNumberOfUsersByMonth = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const data = await userService.getNumberOfUsersByMonth();
+        sendResponse(res, data, 'users fetched successfully', 200);
+    })(req, res, next);
+}
+
 // Get Jobs Counts
 export const getJobsCounts = async (req, res, next) => {
     wrapper(async (req, res, next) => {

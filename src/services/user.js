@@ -116,3 +116,34 @@ export const getJobsCounts = async () => {
           });
         return result;
 }
+
+export const getNumberOfUsersByMonth = async () => {
+      // Aggregate query to group users by month and year, counting them
+      const result = await User.aggregate([
+        {
+          $project: {
+            year: { $year: "$CreatedAt" },
+            month: { $month: "$CreatedAt" },
+          },
+        },
+        {
+          $group: {
+            _id: { year: "$year", month: "$month" }, // Group by year and month
+            count: { $sum: 1 }, // Count number of users in each group
+          },
+        },
+        {
+          $sort: { "_id.year": 1, "_id.month": 1 }, // Sort by year and month ascending
+        },
+        {
+          $project: {
+            year: "$_id.year",
+            month: "$_id.month",
+            count: 1,
+            _id: 0,
+          },
+        },
+      ]);
+      
+      return result; // This will return an array of objects with year, month, and count
+  }
