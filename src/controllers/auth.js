@@ -63,7 +63,7 @@ export const handleGoogleCallback = (req, res, next) => {
         try {
             const token = JWTOps.generateToken({ id: user._id });
 
-            return res.redirect(`${process.env.FRONTEND_URL}/home?token=${token}`);
+            return res.redirect(`${process.env.FRONTEND_URL}/successLoginPage?token=${token}`);
         } catch (error) {
             next(error);
         }
@@ -88,7 +88,7 @@ export const handleGithubCallback = (req, res, next) => {
         try {
             const token = JWTOps.generateToken({ id: user._id });
 
-            return res.redirect(`${process.env.FRONTEND_URL}/home?token=${token}`);
+            return res.redirect(`${process.env.FRONTEND_URL}/successLoginPage?token=${token}`);
         } catch (error) {
             next(error);
         }
@@ -111,7 +111,7 @@ export const handleFacebookCallback = (req, res, next) => {
         try {
             const token = JWTOps.generateToken({ id: user._id });
 
-            return res.redirect(`${process.env.FRONTEND_URL}/home?token=${token}`);
+            return res.redirect(`${process.env.FRONTEND_URL}/successLoginPage?token=${token}`);
         } catch (error) {
             next(error);
         }
