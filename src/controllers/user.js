@@ -4,6 +4,21 @@ import { sendResponse } from "../utils/response.js";
 
 
 
+
+export const updateUserJob = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        // getting user id and job from request
+        const user_id = req.userId;
+        const job = req.body.job;
+
+        // updating user job
+        const user = await userService.updateUserJob(user_id, job);
+
+        // sending response to client
+        sendResponse(res, user, "User job updated successfully", 200);
+
+    })(req, res, next);
+}
 // Controller to get users per month
 export const getNumberOfUsersByMonth = async (req, res, next) => {
     wrapper(async (req, res, next) => {

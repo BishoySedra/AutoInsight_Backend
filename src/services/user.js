@@ -6,7 +6,7 @@ dotenv.config();
 
 // Service to get recent 4 users
 export const getRecentUsers = async () => {
-    const users = await User.find({}).select("-password").sort({ createdAt: -1 }).limit(4);
+    const users = await User.find({}).select("-password +createdAt").sort({ createdAt: 1 }).limit(4);
     return users;
 };
 
@@ -147,3 +147,15 @@ export const getNumberOfUsersByMonth = async () => {
       
       return result; // This will return an array of objects with year, month, and count
   }
+
+export const updateUserJob = async (userId, job) => {
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+        throw createCustomError(`User not found`, 404);
+    }
+    // Update job
+    user.job = job;
+    await user.save();
+    return user;
+}

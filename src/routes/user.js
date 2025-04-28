@@ -5,6 +5,7 @@ import uploadFile from "../middlewares/upload/file.js"
 
 const router = Router();
 
+
 // endpoint to get jobs counts
 router.get("/jobs-count", userController.getJobsCounts);
 // endpoint to get jobs counts
@@ -33,5 +34,7 @@ router.get('/:id', userController.getUserDataById);
 
 // endpoint to update profile picture
 router.put("/profile-picture", authorize, uploadFile, userController.updateProfilePicture);
+
+router.patch("/update-job", authorize, userController.updateUserJob);
 
 export default router;
