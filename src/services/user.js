@@ -10,6 +10,33 @@ export const getRecentUsers = async () => {
     return users;
 };
 
+export const getCountryCounts = async () => {
+    try {
+      const result = await User.aggregate([
+        {
+          $group: {
+            _id: '$country', // Group by the 'countries' field
+            count: { $sum: 1 }, // Count occurrences
+          },
+        },
+        {
+          $sort: { count: -1 }, // Optional: Sort by count in descending order
+        },
+        {
+          $project: {
+            country: '$_id', // Rename _id to country
+            count: 1,
+            _id: 0, // Exclude _id field
+          },
+        },
+      ]);
+  
+      return result;
+    } catch (error) {
+      throw new Error('Failed to fetch country counts: ' + error.message);
+    }
+  };
+
 // Service to update profile picture
 export const updateProfilePicture = async (user_id, profilePictureURL) => {
     // console.log(profilePictureURL);

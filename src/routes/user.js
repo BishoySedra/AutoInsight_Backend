@@ -5,8 +5,9 @@ import uploadFile from "../middlewares/upload/file.js"
 
 const router = Router();
 
-// endpoint to update profile picture
-router.put("/profile-picture", authorize, uploadFile, userController.updateProfilePicture);
+
+// endpoint to get user id by username or email
+router.get("/country-count", userController.getCountryCounts);
 
 // endpoint to get user id by username or email
 router.get("/user-id", userController.getUserId);
@@ -25,5 +26,8 @@ router.get('/recent-4-users', userController.getRecentUsers);
 
 // endpoint to get user data by id
 router.get('/:id', userController.getUserDataById);
+
+// endpoint to update profile picture
+router.put("/profile-picture", authorize, uploadFile, userController.updateProfilePicture);
 
 export default router;
