@@ -11,30 +11,26 @@ export const getRecentUsers = async () => {
 };
 
 export const getCountryCounts = async () => {
-    try {
       const result = await User.aggregate([
         {
           $group: {
-            _id: '$country', // Group by the 'countries' field
-            count: { $sum: 1 }, // Count occurrences
+            _id: { $toLower: '$country'}, 
+            count: { $sum: 1 }, 
           },
         },
         {
-          $sort: { count: -1 }, // Optional: Sort by count in descending order
+          $sort: { count: -1 },
         },
         {
           $project: {
-            country: '$_id', // Rename _id to country
+            country: '$_id', 
             count: 1,
-            _id: 0, // Exclude _id field
+            _id: 0, 
           },
         },
       ]);
   
       return result;
-    } catch (error) {
-      throw new Error('Failed to fetch country counts: ' + error.message);
-    }
   };
 
 // Service to update profile picture

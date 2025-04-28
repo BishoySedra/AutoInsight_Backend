@@ -14,6 +14,16 @@ export const getRecentUsers = async (req, res, next) => {
 
     })(req, res, next);
 }
+
+export const getCountryCounts = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        // getting all users from user service
+        const counts = await userService.getCountryCounts();
+        // sending response to client
+        sendResponse(res, counts, "Countries Counts fetched successfully", 200);
+    })(req, res, next);
+}
+
 // Controller to update profile picture
 export const updateProfilePicture = async (req, res, next) => {
     wrapper(async (req, res, next) => {
