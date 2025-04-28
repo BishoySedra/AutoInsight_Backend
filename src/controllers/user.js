@@ -3,7 +3,7 @@ import { wrapper } from "../utils/wrapper.js";
 import { sendResponse } from "../utils/response.js";
 
 
-
+// Get Jobs Counts
 export const getJobsCounts = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const users = await userService.getJobsCounts();

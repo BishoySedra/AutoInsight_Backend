@@ -104,3 +104,15 @@ export const getNumberOfUsers = async () => {
     const count = await User.countDocuments({});
     return count;
 }
+
+export const getJobsCounts = async () => {
+        const users = await User.find({});
+        const result = {};
+        users.forEach(user => {
+            if (result.hasOwnProperty(user.job))
+                result[user.job]++;
+            else 
+                result[user.job] = 1;
+          });
+        return result;
+}
