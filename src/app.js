@@ -23,6 +23,7 @@ import userRouter from "./routes/user.js";
 import datasetRouter from "./routes/dataset.js";
 import chatbotRouter from "./routes/chatbot.js";
 import teamRouter from "./routes/team.js";
+import notificationRouter from "./routes/notification.js";
 
 // Error handlers
 import errorHandler from "./middlewares/errors/errorHandler.js";
@@ -76,6 +77,7 @@ app.use(`${baseUrl}/users`, userRouter);
 app.use(`${baseUrl}/datasets`, datasetRouter);
 app.use(`${baseUrl}/chatbot`, chatbotRouter);
 app.use(`${baseUrl}/teams`, teamRouter);
+app.use(`${baseUrl}/notifications`, notificationRouter);
 
 // =======================
 // Error Handling

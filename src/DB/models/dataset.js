@@ -14,7 +14,6 @@ const DatasetSchema = new mongoose.Schema(
         },
         business_domain: {
             type: String,
-            required: true,
         },
         dataset_url: {
             type: String,
