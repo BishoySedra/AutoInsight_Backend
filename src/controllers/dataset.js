@@ -389,7 +389,7 @@ export const getNumberOfGeneratedDashboards = async (req, res, next) => {
 
 export const getNumberOfDomains = async ( req, res, next) => {
   wrapper(async (req, res, next) => {
-    const count = await datasetService.getNumberOfDomains();
+    const count = await datasetService.getNumbersOfDomains();
     return sendResponse(res, count, "Number of domains fetched successfully", 200);
   })(req, res, next);
 }

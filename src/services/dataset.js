@@ -446,7 +446,7 @@ export const getNumbersOfDomains = async () => {
             education: 0,
           };
         datasets.forEach(item => {
-            if (item.business_domain)
+            if (item.business_domain && result.hasOwnProperty(item.business_domain))
                 result[item.business_domain]++;
           });
         return result;
