@@ -10,6 +10,7 @@ export const getRecentUsers = async () => {
     return users;
 };
 
+
 export const getCountryCounts = async () => {
       const result = await User.aggregate([
         {
