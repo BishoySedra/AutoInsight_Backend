@@ -5,8 +5,10 @@ import uploadFile from "../middlewares/upload/file.js"
 
 const router = Router();
 
+// endpoint to get jobs counts
+router.get("/jobs-count", userController.getJobsCounts);
 
-// endpoint to get user id by username or email
+// endpoint to get countries counts
 router.get("/country-count", userController.getCountryCounts);
 
 // endpoint to get user id by username or email
