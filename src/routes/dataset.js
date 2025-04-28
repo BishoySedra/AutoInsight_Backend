@@ -8,6 +8,7 @@ const router = Router();
 
 router.get("/cleaned-datasets-count", authorize, datasetController.getNumberOfDatasetsCleaned);
 router.get("/generated_dashboards_no", authorize, datasetController.getNumberOfGeneratedDashboards);
+router.get("/domains-count", authorize, datasetController.getNumberOfDomains);
 
 router.post("/choose-domain", authorize, datasetController.selectDomain);
 router.post("/upload", authorize, uploadFile, datasetController.storeFile);

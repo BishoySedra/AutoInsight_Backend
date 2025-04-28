@@ -12,6 +12,10 @@ const DatasetSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        business_domain: {
+            type: String,
+            required: true,
+        },
         dataset_url: {
             type: String,
             required: true,

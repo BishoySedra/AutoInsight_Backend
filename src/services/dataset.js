@@ -438,3 +438,16 @@ export const getNumberOfGeneratedDashboards = async () => {
       });
     return count;
 }
+
+export const getNumbersOfDomains = async () => {
+        const datasets = await Dataset.find({});
+        const result = {
+            ecommerce: 0,
+            education: 0,
+          };
+        datasets.forEach(item => {
+            if (item.business_domain)
+                result[item.business_domain]++;
+          });
+        return result;
+}

@@ -4,6 +4,12 @@ import { createCustomError } from "../middlewares/errors/customError.js";
 
 dotenv.config();
 
+// Service to get recent 4 users
+export const getRecentUsers = async () => {
+    const users = await User.find({}).select("-password").sort({ createdAt: -1 }).limit(4);
+    return users;
+};
+
 // Service to update profile picture
 export const updateProfilePicture = async (user_id, profilePictureURL) => {
     // console.log(profilePictureURL);

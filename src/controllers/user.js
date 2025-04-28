@@ -2,6 +2,18 @@ import * as userService from "../services/user.js";
 import { wrapper } from "../utils/wrapper.js";
 import { sendResponse } from "../utils/response.js";
 
+
+// Get all Users
+export const getRecentUsers = async (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        // getting all users from user service
+        const users = await userService.getRecentUsers();
+
+        // sending response to client
+        sendResponse(res, users, "Users fetched successfully", 200);
+
+    })(req, res, next);
+}
 // Controller to update profile picture
 export const updateProfilePicture = async (req, res, next) => {
     wrapper(async (req, res, next) => {

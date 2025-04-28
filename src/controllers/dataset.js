@@ -239,7 +239,8 @@ export const generateInsights = async (req, res, next) => {
       dataset_name: uploadData.dataset_name,
       dataset_url: fileUrl,
       cleaned_dataset_url: cleaned_dataset_url || null,
-      insights_urls: uploadedImages || {}
+      insights_urls: uploadedImages || {},
+      business_domain: domainType,
     });
 
     // Save the dataset to the database
@@ -383,5 +384,12 @@ export const getNumberOfGeneratedDashboards = async (req, res, next) => {
   wrapper(async (req, res, next) => {
     const count = await datasetService.getNumberOfGeneratedDashboards();
     return sendResponse(res, count, "Number of datasets cleaned successfully", 200);
+  })(req, res, next);
+}
+
+export const getNumberOfDomains = async ( req, res, next) => {
+  wrapper(async (req, res, next) => {
+    const count = await datasetService.getNumberOfDomains();
+    return sendResponse(res, count, "Number of domains fetched successfully", 200);
   })(req, res, next);
 }
