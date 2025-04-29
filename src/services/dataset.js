@@ -322,6 +322,7 @@ export const share = async (dataset_id, user_id, permission) => {
 
         // save the shared dataset
         await sharedDataset.save();
+        return dataset.dataset_name;        
     }
 };
 
@@ -364,6 +365,7 @@ export const unshare = async (dataset_id, user_id) => {
 
     // remove the dataset_id and user_id from the shared_datasets collection
     await SharedDataset.deleteOne({ dataset_id, user_id });
+    return dataset.dataset_name;
 };
 
 // Service to read permissions of a dataset

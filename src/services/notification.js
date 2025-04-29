@@ -9,8 +9,8 @@ import Notification from '../DB/models/notification.js';
     return notifications;
   }
 
-  export const createNotification = async (userId, message) => {
-    const notification = new Notification({ userId, message });
+  export const createNotification = async (user, message) => {
+    const notification = new Notification({ user, message });
     await notification.save();
     return notification;
   } 
