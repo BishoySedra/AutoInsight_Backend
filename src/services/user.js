@@ -122,8 +122,8 @@ export const getNumberOfUsersByMonth = async () => {
       const result = await User.aggregate([
         {
           $project: {
-            year: { $year: "$CreatedAt" },
-            month: { $month: "$CreatedAt" },
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
           },
         },
         {
