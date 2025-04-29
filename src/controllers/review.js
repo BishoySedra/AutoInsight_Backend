@@ -10,9 +10,7 @@ export const addReview = async (req, res, next) => {
         const { description } = reviewData;
         const sentiment = await reviewService.analyzeSentiment(description);
         // sentiment = { sentiment: 'negative', confidence: 62.49, sarcasm_detected: false }
-        reviewData.sentiment = sentiment.setiment;
-        const review = await reviewService.addReview(user_id, reviewData);
-        console.log(review);
+        const review = await reviewService.addReview(user_id, { sentiment: sentiment.sentiment, ...reviewData});
         return sendResponse(res, review, "Review added successfully", 201);
     }) (req, res, next);
 };

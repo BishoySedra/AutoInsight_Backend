@@ -6,7 +6,23 @@ dotenv.config();
 
 // Service to get recent 4 users
 export const getRecentUsers = async () => {
-    const users = await User.find({}).select("username country email job createdAt").sort({ createdAt: 1 }).limit(4);
+    const users = await User.aggregate([
+      {
+        $sort: { createdAt: -1 } // Sort by createdAt descending (most recent first)
+      },
+      {
+        $limit: 4 // Take only 4 users after sorting
+      },
+      {
+        $project: {
+          username: 1,
+          email: 1,
+          profile_picture: 1,
+          createdAt: 1,
+          _id: 0, // Uncomment this if you want to hide _id
+        }
+      }
+    ]);
     return users;
 };
 

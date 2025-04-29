@@ -7,7 +7,6 @@ import axios from 'axios';
 
 export const analyzeSentiment = async (review) => {
     const response = await axios.post(`${process.env.FASTAPI_URL}/predict-review`, { review });
-    console.log(response.data);
     // { sentiment: 'negative', confidence: 62.49, sarcasm_detected: false }
     return response.data;
 }
@@ -26,6 +25,7 @@ export const getReviewsCounts = async () => {
 }
 
 export const addReview = async (user_id, reviewData) => {
+    console.log(reviewData);
     const { rating, description, sentiment } = reviewData;
 
     if (!user_id || !rating) {
