@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  admin: {
+    type: Boolean,
+    default: false,
+  },
   job: {
     type: String,
     required: true,

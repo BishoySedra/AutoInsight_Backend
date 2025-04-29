@@ -92,6 +92,7 @@ export const loginUser = async (userData) => {
     const token = tokenOperations.generateToken({
         id: foundUser._id,
         email: foundUser.email,
+        admin: foundUser.admin,
     });
 
     return { token };

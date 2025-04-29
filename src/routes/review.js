@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as reviewController from "../controllers/review.js";
 import authorize from "../middlewares/authorization/authorize.js"
+import authorizeAdmin from "../middlewares/authorization/authorizeAdmin.js"
 
 const router = Router();
 
@@ -10,7 +11,7 @@ router.post("/", authorize, reviewController.addReview);
 // endpoint to get all reviews using pagination
 router.get("/", reviewController.getAllReviews);
 
-router.get("/reviews_stats", reviewController.getReviewsCounts);
+router.get("/reviews_stats", authorizeAdmin, reviewController.getReviewsCounts);
 
 // endpoint to get a review by ID
 router.get("/:id", authorize, reviewController.getReviewById);
