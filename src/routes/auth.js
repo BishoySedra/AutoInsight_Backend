@@ -3,6 +3,7 @@ import * as authController from "../controllers/auth.js";
 import validate from "../middlewares/validation/validate.js";
 import * as userSchemas from "../middlewares/validation/schemas/user.js";
 import dotenv from "dotenv";
+import authorize from '../middlewares/authorization/authorize.js';
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ router.post("/signup", validate(userSchemas.signUpSchema), authController.signUp
 router.post("/login", validate(userSchemas.loginSchema), authController.loginUser);
 
 // route to login a user
-router.patch("/change-password", authController.changePassword);
+router.patch("/change-password", authorize, authController.changePassword);
 
 // route to forgot password
 router.post('/forgot-password', authController.forgetPassword);

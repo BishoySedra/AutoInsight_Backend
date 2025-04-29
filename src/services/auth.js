@@ -161,8 +161,7 @@ export const resetPassword = async (token, newPassword) => {
 
 export const changePassword = async (userId, oldPassword, newPassword) => {
     // get the user from the database
-    const user = await User.findById(userId);
-
+    const user = await User.findById(userId).select('password');
     // check if the old password is correct
     const isPasswordCorrect = await hashingOperations.comparePassword(
         oldPassword,

@@ -26,7 +26,7 @@ router.get("/user-data", authorize, userController.getUserDetails);
 router.get("/users-no", authorize, userController.getNumberOfUsers);
 
 // endpoint to search users
-router.get('/search', authorize, userController.searchUsers);
+router.get('/search', userController.searchUsers);
 
 // endpoint to get recent users
 router.get('/recent-4-users', authorizeAdmin, userController.getRecentUsers);

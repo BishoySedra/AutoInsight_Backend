@@ -54,7 +54,7 @@ export const changePassword = (req, res, next) => {
     wrapper(async (req, res, next) => {
         const { oldPassword, newPassword } = req.body;
         const user = await authService.changePassword(req.userId, oldPassword, newPassword);
-        return user;
+        return sendResponse(res, user, 'password updated successfully', 200);
     })(req, res, next);
 }
 
