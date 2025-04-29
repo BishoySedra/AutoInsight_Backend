@@ -26,7 +26,7 @@ export const getReviewsCounts = async () => {
 }
 
 export const addReview = async (user_id, reviewData) => {
-    const { rating, description } = reviewData;
+    const { rating, description, sentiment } = reviewData;
 
     if (!user_id || !rating) {
         throw createCustomError("User ID and rating are required", 400);
@@ -36,7 +36,7 @@ export const addReview = async (user_id, reviewData) => {
         throw createCustomError("Rating must be between 1 and 5", 400);
     }
 
-    const review = new Review({ user_id, rating, description });
+    const review = new Review({ user_id, rating, description, sentiment });
     return await review.save();
 };
 
