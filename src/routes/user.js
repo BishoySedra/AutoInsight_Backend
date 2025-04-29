@@ -8,6 +8,7 @@ const router = Router();
 
 // endpoint to get jobs counts
 router.get("/jobs-count", userController.getJobsCounts);
+
 // endpoint to get jobs counts
 router.get("/users-months", userController.getNumberOfUsersByMonth);
 
