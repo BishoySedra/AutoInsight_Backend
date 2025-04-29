@@ -25,7 +25,6 @@ export const getReviewsCounts = async () => {
 }
 
 export const addReview = async (user_id, reviewData) => {
-    console.log(reviewData);
     const { rating, description, sentiment } = reviewData;
 
     if (!user_id || !rating) {
