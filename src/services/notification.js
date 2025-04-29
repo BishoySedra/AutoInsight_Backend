@@ -1,6 +1,6 @@
 import Notification from '../DB/models/notification.js';
 
-  export const getNotificationsWithPagination = async (userId, page, limit) => {
+  export const getNotificationsWithPagination = async (userId, page = 1, limit = 10) => {
     const skip = (page - 1) * limit;
     const notifications = await Notification.find({ userId })
       .sort({ createdAt: -1 })
