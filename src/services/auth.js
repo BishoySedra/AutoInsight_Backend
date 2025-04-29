@@ -158,6 +158,28 @@ export const resetPassword = async (token, newPassword) => {
     }
 };
 
+export const changePassword = async (userId, oldPassword, newPassword) => {
+    // get the user from the database
+    const user = await User.findById(userId);
+
+    // check if the old password is correct
+    const isPasswordCorrect = await hashingOperations.comparePassword(
+        oldPassword,
+        user.password
+    );
+
+    if (!isPasswordCorrect) {
+        throw createCustomError("Invalid credentials", 400);
+    }
+
+    // hash the new password
+    const hashedPassword = await hashingOperations.hashPassword(newPassword);
+
+    // update the password in the database
+    user.password = hashedPassword;
+    await user.save();
+}
+
 // sign up with different credentials
 export const signUpWithOAuthProvider = async (userData) => {
     // hash the password

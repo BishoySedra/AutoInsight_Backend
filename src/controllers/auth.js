@@ -48,6 +48,16 @@ export const resetPassword = async (req, res, next) => {
     })(req, res, next);
 };
 
+// Change password
+
+export const changePassword = (req, res, next) => {
+    wrapper(async (req, res, next) => {
+        const { oldPassword, newPassword } = req.body;
+        const user = await authService.changePassword(req.userId, oldPassword, newPassword);
+        return user;
+    })(req, res, next);
+}
+
 // Start login with Google
 export const startLoginWithGoogle = (req, res, next) => {
     passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);

@@ -14,6 +14,9 @@ router.post("/signup", validate(userSchemas.signUpSchema), authController.signUp
 // route to login a user
 router.post("/login", validate(userSchemas.loginSchema), authController.loginUser);
 
+// route to login a user
+router.patch("/change-password", authController.changePassword);
+
 // route to forgot password
 router.post('/forgot-password', authController.forgetPassword);
 
