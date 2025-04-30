@@ -1,5 +1,5 @@
 import * as teamService from '../services/team.js';
-import * as notificationService from '../services/notification.js';
+import { createNotification } from '../services/notification.js';
 import { wrapper } from "../utils/wrapper.js";
 import { sendResponse } from "../utils/response.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
@@ -32,7 +32,7 @@ export const updateTeamMembers = wrapper(async (req, res) => {
 
     // update team members
     const updatedTeam = await teamService.updateTeamMembers(teamId, members);
-    members.forEach(member => notificationService.createNotification(member, `You are a member of team ${updatedTeam.name}`));
+    members.forEach(member => createNotification(member, `You are a member of team ${updatedTeam.name}`));
     return sendResponse(res, updatedTeam, "Team members updated successfully", 200);
 });
 
