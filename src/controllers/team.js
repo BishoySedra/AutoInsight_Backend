@@ -1,4 +1,5 @@
 import * as teamService from '../services/team.js';
+import * as notificationService from '../services/notification.js';
 import { wrapper } from "../utils/wrapper.js";
 import { sendResponse } from "../utils/response.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
@@ -11,6 +12,7 @@ export const createTeam = wrapper(async (req, res) => {
 
     // create new team
     const team = await teamService.createTeam(teamData, owner);
+    await notificationService.createNotification(owner, `Team ${teamData.name} has been created `);
     return sendResponse(res, team, "Team created successfully", 201);
 });
 
@@ -30,6 +32,7 @@ export const updateTeamMembers = wrapper(async (req, res) => {
 
     // update team members
     const updatedTeam = await teamService.updateTeamMembers(teamId, members);
+    members.forEach(member => notificationService.createNotification(member, `You are a member of team ${updatedTeam.name}`));
     return sendResponse(res, updatedTeam, "Team members updated successfully", 200);
 });
 

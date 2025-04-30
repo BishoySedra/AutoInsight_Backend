@@ -330,8 +330,8 @@ export const share = async (req, res, next) => {
     const { user_id, permission } = req.body;
     const { dataset_id } = req.params;
     const name = await datasetService.share(dataset_id, user_id, permission);
-    await notificationService.createNotification(user_id, 
-      { message: `You've been given ${permission} permission to ${name}` });
+    const not = await notificationService.createNotification(user_id, `You've been given ${permission} permission to ${name}` );
+    console.log(not);
     return sendResponse(res, null, "Dataset shared successfully", 200);
   })(req, res, next);
 }
@@ -342,8 +342,7 @@ export const unshare = async (req, res, next) => {
     const { user_id } = req.body;
     const { dataset_id } = req.params;
     const name = await datasetService.unshare(dataset_id, user_id);
-    await notificationService.createNotification(user_id, 
-      { message: `Sharing with this dataset ${name} has been removed ` });
+    await notificationService.createNotification(user_id, `Sharing with this dataset ${name} has been removed `);
 
     return sendResponse(res, null, "Dataset unshared successfully", 200);
   })(req, res, next);
