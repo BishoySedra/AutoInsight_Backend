@@ -86,7 +86,7 @@ export const getAllTeams = async (userId) => {
     const teams = await Team.find({ $or: [{ owner: userId }, { members: userId }] }, { __v: 0, createdAt: 0, updatedAt: 0 })
         .populate("owner", "-password -__v -_id -resetPasswordToken -resetPasswordExpires")
         .populate("members", "-password -__v -_id -resetPasswordToken -resetPasswordExpires")
-        .populate("datasets", "-__v -_id -user_id -createdAt -updatedAt -shared_usernames -insights_urls");
+        .populate("datasets", "-__v _id -user_id -createdAt -updatedAt -shared_usernames -insights_urls");
 
     return teams;
 };
