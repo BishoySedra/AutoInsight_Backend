@@ -22,6 +22,7 @@ export const getAllTeams = wrapper(async (req, res) => {
 
     // get all teams for the current user
     const teams = await teamService.getAllTeams(userId);
+    
     return sendResponse(res, teams, "Teams fetched successfully", 200);
 });
 

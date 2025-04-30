@@ -318,8 +318,7 @@ export const deleteDataset = async (req, res, next) => {
     const user_id = req.userId;
     const { dataset_id } = req.params;
     await datasetService.deleteDataset(dataset_id, user_id);
-    await notificationService.createNotification(user_id,
-    { message: `The dataset with id ${dataset_id} has been deleted` });
+    await notificationService.createNotification(user_id, `The dataset with id ${dataset_id} has been deleted`);
     return sendResponse(res, null, "Dataset deleted successfully", 200);
   })(req, res, next);
 }
