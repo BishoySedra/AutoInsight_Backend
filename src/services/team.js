@@ -46,13 +46,16 @@ export const createTeam = async (teamData, owner) => {
     // check if datasets exist
     let datasetsData = [];
     if (datasets) {
+        console.log(datasets)
         datasetsData = await Promise.all(datasets.map(async (dataset) => {
             const datasetData = await readById(dataset);
+            console.log("after id ",datasetData)
             if (!datasetData) {
                 throw createCustomError(`Dataset not found`, 404);
             }
-            return datasetData._id;
+            return datasetData.dataset._id;
         }));
+        console.log(datasetsData)
     }
 
     // create new team

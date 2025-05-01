@@ -4,12 +4,13 @@ import { wrapper } from "../utils/wrapper.js";
 import { sendResponse } from "../utils/response.js";
 import { createCustomError } from "../middlewares/errors/customError.js";
 import Team from "../DB/models/team.js";
-
+import * as notificationService from '../services/notification.js';
 // controller to create a new team
 export const createTeam = wrapper(async (req, res) => {
     const teamData = req.body;
     const owner = req.userId;
-
+    console.log(teamData);
+    
     // create new team
     const team = await teamService.createTeam(teamData, owner);
     await notificationService.createNotification(owner, `Team ${teamData.name} has been created `);
