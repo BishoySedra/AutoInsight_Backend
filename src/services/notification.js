@@ -16,12 +16,11 @@ import Notification from '../DB/models/notification.js';
   } 
 
   export const markNotificationAsRead = async (notificationId) => {
-    await Notification.findByIdAndUpdate(notificationId, { isRead: true });
+    await Notification.findByIdAndUpdate(notificationId, { read: true });
   }
 
   export const markAllNotificationsAsRead = async (userId) => {
-    await Notification
-      .updateMany({ userId, isRead: false }, { isRead: true });
+    await Notification.updateMany({ user:userId, read: false }, { read: true });
   }
 
   export const deleteNotification = async (notificationId) => {
@@ -29,11 +28,11 @@ import Notification from '../DB/models/notification.js';
   }
   
   export const deleteAllNotifications = async (userId) => {
-    await Notification.deleteMany({ userId });
+    await Notification.deleteMany({ user:userId });
   }
 
   export const getUnreadNotificationCount = async (userId) => {
-    const count = await Notification.countDocuments({ userId, isRead: false });
+    const count = await Notification.countDocuments({ user: userId, read: false });
     return count;
   }
 
