@@ -14,6 +14,8 @@ import session from "express-session";
 import passport from "passport";
 import ExpressMongoSanitize from "express-mongo-sanitize";
 import xss from "xss-clean";
+import swaggerJsDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 // Routes
 import authRouter from "./routes/auth.js";
@@ -66,6 +68,43 @@ app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
 });
+
+// =======================
+// Swagger Configuration
+// =======================
+const swaggerOptions = {
+    swaggerDefinition: {
+        openapi: "3.0.0",
+        info: {
+            title: "AutoInsight API",
+            version: "1.0.0",
+            description: "API documentation for AutoInsight Backend",
+        },
+        servers: [
+            {
+                url: process.env.BASE_URL || "/api/v1",
+            },
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                },
+            },
+        },
+        security: [
+            {
+                bearerAuth: [],
+            },
+        ],
+    },
+    apis: ["./src/routes/*.js"], // Path to the route files
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // =======================
 // Routes
