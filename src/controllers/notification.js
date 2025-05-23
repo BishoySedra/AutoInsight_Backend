@@ -6,9 +6,6 @@ export const getNotificationsByPagination = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const { page, limit } = req.query;
         const userId = req.userId; // Assuming userId is available in req.userId
-        if (!userId) {
-            return sendResponse(res, null, "User ID is required", 400);
-        }
         const notifications = await notificationService.getNotificationsWithPagination(userId, page, limit);
         return sendResponse(res, notifications, "Notifications fetched successfully", 200);
     })(req, res, next);
@@ -18,9 +15,6 @@ export const createNotification = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const { message } = req.body;
         const userId = req.userId; // Assuming userId is available in req.userId
-        if (!userId) {
-            return sendResponse(res, null, "User ID is required", 400);
-        }
         const notification = await notificationService.createNotification(userId, message);
         return sendResponse(res, notification, "Notification created successfully", 201);
     })(req, res, next);
@@ -54,9 +48,6 @@ export const getNotificationById = async (req, res, next) => {
 export const markAllNotificationsAsRead = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const userId = req.userId; // Assuming userId is available in req.userId
-        if (!userId) {
-            return sendResponse(res, null, "User ID is required", 400);
-        }
         await notificationService.markAllNotificationsAsRead(userId);
         return sendResponse(res, null, "All notifications marked as read successfully", 200);
     })(req, res, next);
@@ -65,9 +56,6 @@ export const markAllNotificationsAsRead = async (req, res, next) => {
 export const deleteAllNotifications = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const userId = req.userId; // Assuming userId is available in req.userId
-        if (!userId) {
-            return sendResponse(res, null, "User ID is required", 400);
-        }
         await notificationService.deleteAllNotifications(userId);
         return sendResponse(res, null, "All notifications deleted successfully", 200);
     })(req, res, next);
@@ -76,9 +64,6 @@ export const deleteAllNotifications = async (req, res, next) => {
 export const getUnreadNotificationCount = async (req, res, next) => {
     wrapper(async (req, res, next) => {
         const userId = req.userId; // Assuming userId is available in req.userId
-        if (!userId) {
-            return sendResponse(res, null, "User ID is required", 400);
-        }
         const count = await notificationService.getUnreadNotificationCount(userId);
         return sendResponse(res, { count }, "Unread notification count fetched successfully", 200);
     })(req, res, next);
