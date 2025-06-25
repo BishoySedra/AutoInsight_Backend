@@ -35,7 +35,6 @@ import notFoundHandler from "./middlewares/errors/notFoundHandler.js";
 // App Initialization
 // =======================
 const app = express();
-const baseUrl = process.env.BASE_URL || "/api/v1";
 
 // =======================
 // Global Middlewares
@@ -72,36 +71,79 @@ app.use((req, res, next) => {
 // =======================
 // Swagger Configuration
 // =======================
-const swaggerOptions = {
-    swaggerDefinition: {
-        openapi: "3.0.0",
-        info: {
-            title: "AutoInsight API",
-            version: "1.0.0",
-            description: "API documentation for AutoInsight Backend",
-        },
-        servers: [
-            {
-                url: process.env.BASE_URL || "/api/v1",
+const port = process.env.PORT || 3000;
+const baseUrl = process.env.BASE_URL || "/api/v1";
+const appUrl = process.env.APP_URL || `localhost`;
+const protocol = process.env.PROTOCOL || "http";
+let swaggerOptions = {};
+if (process.env.NODE_ENV !== "production") {
+    console.log("Swagger is enabled in development mode");
+    swaggerOptions = {
+        swaggerDefinition: {
+            openapi: "3.0.0",
+            info: {
+                title: "AutoInsight API",
+                version: "1.0.0",
+                description: "API documentation for AutoInsight Backend",
             },
-        ],
-        components: {
-            securitySchemes: {
-                bearerAuth: {
-                    type: "http",
-                    scheme: "bearer",
-                    bearerFormat: "JWT",
+            servers: [
+                {
+                    url: `${protocol}://localhost:${port}${baseUrl}`, // Use the base URL from environment variables
+                    description: "Development server",
+                },
+            ],
+            components: {
+                securitySchemes: {
+                    bearerAuth: {
+                        type: "http",
+                        scheme: "bearer",
+                        bearerFormat: "JWT",
+                    },
                 },
             },
+            security: [
+                {
+                    bearerAuth: [],
+                },
+            ],
         },
-        security: [
-            {
-                bearerAuth: [],
+        apis: ["./src/routes/*.js"], // Path to the route files
+    };
+} else {
+    console.log("Swagger is enabled in production mode");
+    const app_url = process.env.APP_URL;
+    swaggerOptions = {
+        swaggerDefinition: {
+            openapi: "3.0.0",
+            info: {
+                title: "AutoInsight API",
+                version: "1.0.0",
+                description: "API documentation for AutoInsight Backend",
             },
-        ],
-    },
-    apis: ["./src/routes/*.js"], // Path to the route files
-};
+            servers: [
+                {
+                    url: `${protocol}://${app_url}${baseUrl}`, // Use the base URL from environment variables
+                    description: "Production server",
+                },
+            ],
+            components: {
+                securitySchemes: {
+                    bearerAuth: {
+                        type: "http",
+                        scheme: "bearer",
+                        bearerFormat: "JWT",
+                    },
+                },
+            },
+            security: [
+                {
+                    bearerAuth: [],
+                },
+            ],
+        },
+        apis: ["./src/routes/*.js"], // Path to the route files
+    };
+}
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
