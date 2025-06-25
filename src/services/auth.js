@@ -6,7 +6,7 @@ import { EmailService } from '../services/email.js';
 import { TokenRepository } from '../repositories/tokenRepository.js';
 import { config } from '../config/config.js';
 import { logger } from '../utils/logger.js';
-import { NodemailerAdapter } from '../adapters/nodemailerAdapter.js';
+import { NodemailerAdapter } from '../adapters/NodeMailerAdapter.js';
 import crypto from 'crypto';
 
 
