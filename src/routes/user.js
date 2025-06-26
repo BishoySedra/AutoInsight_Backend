@@ -10,13 +10,13 @@ const router = Router();
  * @swagger
  * /users/jobs-count:
  *   get:
- *     summary: Get job counts
+ *     summary: Retrieve the total number of jobs
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Successfully retrieved job counts
+ *         description: Successfully retrieved the total number of jobs
  *         content:
  *           application/json:
  *             example:
@@ -32,13 +32,13 @@ router.get("/jobs-count", authorizeAdmin, userController.getJobsCounts);
  * @swagger
  * /users/users-months:
  *   get:
- *     summary: Get number of users by month
+ *     summary: Retrieve the number of users registered per month
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Successfully retrieved user data
+ *         description: Successfully retrieved user registration data
  *         content:
  *           application/json:
  *             example:
@@ -55,13 +55,13 @@ router.get("/users-months", authorizeAdmin, userController.getNumberOfUsersByMon
  * @swagger
  * /users/country-count:
  *   get:
- *     summary: Get country counts
+ *     summary: Retrieve the number of users by country
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Successfully retrieved country counts
+ *         description: Successfully retrieved user counts by country
  *         content:
  *           application/json:
  *             example:
@@ -78,7 +78,7 @@ router.get("/country-count", authorizeAdmin, userController.getCountryCounts);
  * @swagger
  * /users/user-id:
  *   get:
- *     summary: Get user ID by username or email
+ *     summary: Retrieve a user's ID by their username or email
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -87,15 +87,15 @@ router.get("/country-count", authorizeAdmin, userController.getCountryCounts);
  *         name: username
  *         schema:
  *           type: string
- *         description: Username of the user
+ *         description: The username of the user
  *       - in: query
  *         name: email
  *         schema:
  *           type: string
- *         description: Email of the user
+ *         description: The email address of the user
  *     responses:
  *       200:
- *         description: Successfully retrieved user ID
+ *         description: Successfully retrieved the user ID
  *         content:
  *           application/json:
  *             example:
@@ -111,7 +111,7 @@ router.get("/user-id", authorize, userController.getUserId);
  * @swagger
  * /users/user-data:
  *   get:
- *     summary: Get user details
+ *     summary: Retrieve detailed information about the authenticated user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -135,11 +135,11 @@ router.get("/user-data", authorize, userController.getUserDetails);
  * @swagger
  * /users/users-no:
  *   get:
- *     summary: Get total number of users
+ *     summary: Retrieve the total number of users
  *     tags: [Users]
  *     responses:
  *       200:
- *         description: Successfully retrieved user count
+ *         description: Successfully retrieved the total number of users
  *         content:
  *           application/json:
  *             example:
@@ -155,14 +155,14 @@ router.get("/users-no", authorize, userController.getNumberOfUsers);
  * @swagger
  * /users/search:
  *   get:
- *     summary: Search users
+ *     summary: Search for users based on a query
  *     tags: [Users]
  *     parameters:
  *       - in: query
  *         name: query
  *         schema:
  *           type: string
- *         description: Search query
+ *         description: The search query string
  *     responses:
  *       200:
  *         description: Successfully retrieved search results
@@ -185,13 +185,13 @@ router.get('/search', userController.searchUsers);
  * @swagger
  * /users/recent-4-users:
  *   get:
- *     summary: Get the 4 most recent users
+ *     summary: Retrieve the 4 most recently registered users
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Successfully retrieved recent users
+ *         description: Successfully retrieved the most recent users
  *         content:
  *           application/json:
  *             example:
@@ -211,7 +211,7 @@ router.get('/recent-4-users', authorizeAdmin, userController.getRecentUsers);
  * @swagger
  * /users/{id}:
  *   get:
- *     summary: Get user data by ID
+ *     summary: Retrieve detailed information about a user by their ID
  *     tags: [Users]
  *     parameters:
  *       - in: path
@@ -219,7 +219,7 @@ router.get('/recent-4-users', authorizeAdmin, userController.getRecentUsers);
  *         required: true
  *         schema:
  *           type: string
- *         description: User ID
+ *         description: The unique identifier of the user
  *     responses:
  *       200:
  *         description: Successfully retrieved user data
@@ -240,7 +240,7 @@ router.get('/:id', authorize, userController.getUserDataById);
  * @swagger
  * /users/profile-picture:
  *   put:
- *     summary: Update profile picture
+ *     summary: Update the profile picture of the authenticated user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -254,9 +254,10 @@ router.get('/:id', authorize, userController.getUserDataById);
  *               file:
  *                 type: string
  *                 format: binary
+ *                 description: The profile picture file to upload
  *     responses:
  *       200:
- *         description: Successfully updated profile picture
+ *         description: Successfully updated the profile picture
  *         content:
  *           application/json:
  *             example:
@@ -272,7 +273,7 @@ router.put("/profile-picture", authorize, uploadFile, userController.updateProfi
  * @swagger
  * /users/update-job:
  *   patch:
- *     summary: Update user job
+ *     summary: Update the job title of the authenticated user
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -286,9 +287,10 @@ router.put("/profile-picture", authorize, uploadFile, userController.updateProfi
  *               jobTitle:
  *                 type: string
  *                 example: "Software Engineer"
+ *                 description: The new job title for the user
  *     responses:
  *       200:
- *         description: Successfully updated user job
+ *         description: Successfully updated the user's job title
  *         content:
  *           application/json:
  *             example:

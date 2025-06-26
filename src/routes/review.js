@@ -23,9 +23,9 @@ const router = Router();
  *               rating:
  *                 type: number
  *                 example: 4.5
- *               comment:
+ *               description:
  *                 type: string
- *                 example: "Great service!"
+ *                 example: "The product quality is excellent!"
  *     responses:
  *       201:
  *         description: Successfully added review
@@ -34,9 +34,10 @@ const router = Router();
  *             example:
  *               message: "Review added successfully"
  *               body:
- *                 id: "12345"
+ *                 id: "64f1a2b3c4d5e6f7g8h9i0j1"
  *                 rating: 4.5
- *                 comment: "Great service!"
+ *                 description: "The product quality is excellent!"
+ *                 sentiment: "positive"
  *               status: 201
  */
 // Endpoint to add review
@@ -48,21 +49,42 @@ router.post("/", authorize, reviewController.addReview);
  *   get:
  *     summary: Get all reviews with pagination
  *     tags: [Reviews]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         description: Number of reviews per page
  *     responses:
  *       200:
  *         description: Successfully retrieved reviews
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully retrieved reviews"
+ *               message: "Reviews fetched successfully"
  *               body:
  *                 reviews:
- *                   - id: "1"
+ *                   - id: "64f1a2b3c4d5e6f7g8h9i0j1"
  *                     rating: 4.5
- *                     comment: "Great service!"
- *                   - id: "2"
- *                     rating: 3.8
- *                     comment: "Good experience"
+ *                     description: "The product quality is excellent!"
+ *                     sentiment: "positive"
+ *                     user:
+ *                       id: "12345"
+ *                       name: "John Doe"
+ *                   - id: "64f1a2b3c4d5e6f7g8h9i0j2"
+ *                     rating: 3.0
+ *                     description: "Average experience."
+ *                     sentiment: "neutral"
+ *                     user:
+ *                       id: "67890"
+ *                       name: "Jane Smith"
  *               status: 200
  */
 // Endpoint to get all reviews using pagination
@@ -84,10 +106,13 @@ router.get("/", reviewController.getAllReviews);
  *             example:
  *               message: "Successfully retrieved review statistics"
  *               body:
- *                 totalReviews: 100
- *                 averageRating: 4.2
+ *                 totalReviews: 150
+ *                 negative: 30
+ *                 neutral: 50
+ *                 positive: 70
  *               status: 200
  */
+// Endpoint to get review statistics
 router.get("/reviews_stats", authorizeAdmin, reviewController.getReviewsCounts);
 
 /**
@@ -109,11 +134,15 @@ router.get("/reviews_stats", authorizeAdmin, reviewController.getReviewsCounts);
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully retrieved review"
+ *               message: "Review fetched successfully"
  *               body:
- *                 id: "12345"
+ *                 id: "64f1a2b3c4d5e6f7g8h9i0j1"
  *                 rating: 4.5
- *                 comment: "Great service!"
+ *                 description: "The product quality is excellent!"
+ *                 sentiment: "positive"
+ *                 user:
+ *                   id: "12345"
+ *                   name: "John Doe"
  *               status: 200
  */
 // Endpoint to get a review by ID
@@ -142,9 +171,9 @@ router.get("/:id", authorize, reviewController.getReviewById);
  *               rating:
  *                 type: number
  *                 example: 4.8
- *               comment:
+ *               description:
  *                 type: string
- *                 example: "Excellent service!"
+ *                 example: "The service was outstanding!"
  *     responses:
  *       200:
  *         description: Successfully updated review
@@ -153,9 +182,9 @@ router.get("/:id", authorize, reviewController.getReviewById);
  *             example:
  *               message: "Review updated successfully"
  *               body:
- *                 id: "12345"
+ *                 id: "64f1a2b3c4d5e6f7g8h9i0j1"
  *                 rating: 4.8
- *                 comment: "Excellent service!"
+ *                 description: "The service was outstanding!"
  *               status: 200
  */
 // Endpoint to update a review by ID

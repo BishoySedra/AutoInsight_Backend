@@ -11,6 +11,8 @@ const router = Router();
  *   post:
  *     summary: Create a new team
  *     tags: [Teams]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -21,9 +23,19 @@ const router = Router();
  *               name:
  *                 type: string
  *                 example: "Development Team"
- *               description:
+ *               members:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["user1Id", "user2Id"]
+ *               datasets:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["dataset1Id", "dataset2Id"]
+ *               memberPermission:
  *                 type: string
- *                 example: "Team responsible for software development"
+ *                 example: "view"
  *     responses:
  *       201:
  *         description: Team created successfully
@@ -32,9 +44,11 @@ const router = Router();
  *             example:
  *               message: "Team created successfully"
  *               body:
- *                 id: "12345"
+ *                 id: "teamId123"
  *                 name: "Development Team"
- *                 description: "Team responsible for software development"
+ *                 members: ["user1Id", "user2Id"]
+ *                 datasets: ["dataset1Id", "dataset2Id"]
+ *                 memberPermission: "view"
  *               status: 201
  */
 // endpoint to create a new team
@@ -57,10 +71,16 @@ router.post("/", authorize, teamController.createTeam);
  *               message: "Successfully retrieved teams"
  *               body:
  *                 teams:
- *                   - id: "1"
+ *                   - id: "team1Id"
  *                     name: "Development Team"
- *                   - id: "2"
+ *                     members: ["user1Id", "user2Id"]
+ *                     datasets: ["dataset1Id"]
+ *                     memberPermission: "view"
+ *                   - id: "team2Id"
  *                     name: "Marketing Team"
+ *                     members: ["user3Id"]
+ *                     datasets: ["dataset2Id"]
+ *                     memberPermission: "edit"
  *               status: 200
  */
 // endpoint to get all teams for the current user
@@ -70,7 +90,7 @@ router.get("/", authorize, teamController.getAllTeams);
  * @swagger
  * /teams/{teamId}/members:
  *   patch:
- *     summary: Add, remove, or update a team member
+ *     summary: Update team members
  *     tags: [Teams]
  *     security:
  *       - bearerAuth: []
@@ -80,7 +100,7 @@ router.get("/", authorize, teamController.getAllTeams);
  *         required: true
  *         schema:
  *           type: string
- *         description: Team ID
+ *         description: ID of the team to update
  *     requestBody:
  *       required: true
  *       content:
@@ -88,12 +108,11 @@ router.get("/", authorize, teamController.getAllTeams);
  *           schema:
  *             type: object
  *             properties:
- *               action:
- *                 type: string
- *                 example: "add"
- *               memberId:
- *                 type: string
- *                 example: "67890"
+ *               members:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["user1Id", "user2Id"]
  *     responses:
  *       200:
  *         description: Successfully updated team members
@@ -101,7 +120,10 @@ router.get("/", authorize, teamController.getAllTeams);
  *           application/json:
  *             example:
  *               message: "Team members updated successfully"
- *               body: {}
+ *               body:
+ *                 id: "teamId123"
+ *                 name: "Development Team"
+ *                 members: ["user1Id", "user2Id"]
  *               status: 200
  */
 // endpoint to add/remove/update a team member
@@ -111,15 +133,17 @@ router.patch("/:teamId/members", authorize, checkTeamPermission("admin"), teamCo
  * @swagger
  * /teams/{teamId}/datasets:
  *   patch:
- *     summary: Add, remove, or update datasets in a team
+ *     summary: Update datasets in a team
  *     tags: [Teams]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: teamId
  *         required: true
  *         schema:
  *           type: string
- *         description: Team ID
+ *         description: ID of the team to update
  *     requestBody:
  *       required: true
  *       content:
@@ -127,12 +151,11 @@ router.patch("/:teamId/members", authorize, checkTeamPermission("admin"), teamCo
  *           schema:
  *             type: object
  *             properties:
- *               action:
- *                 type: string
- *                 example: "add"
- *               datasetId:
- *                 type: string
- *                 example: "12345"
+ *               datasets:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["dataset1Id", "dataset2Id"]
  *     responses:
  *       200:
  *         description: Successfully updated team datasets
@@ -140,7 +163,10 @@ router.patch("/:teamId/members", authorize, checkTeamPermission("admin"), teamCo
  *           application/json:
  *             example:
  *               message: "Team datasets updated successfully"
- *               body: {}
+ *               body:
+ *                 id: "teamId123"
+ *                 name: "Development Team"
+ *                 datasets: ["dataset1Id", "dataset2Id"]
  *               status: 200
  */
 // endpoint to add/remove/update dataset to a team
@@ -152,13 +178,15 @@ router.patch("/:teamId/datasets", authorize, checkTeamPermission("admin"), teamC
  *   patch:
  *     summary: Update team permissions
  *     tags: [Teams]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: teamId
  *         required: true
  *         schema:
  *           type: string
- *         description: Team ID
+ *         description: ID of the team to update
  *     requestBody:
  *       required: true
  *       content:
@@ -166,7 +194,7 @@ router.patch("/:teamId/datasets", authorize, checkTeamPermission("admin"), teamC
  *           schema:
  *             type: object
  *             properties:
- *               permission:
+ *               memberPermission:
  *                 type: string
  *                 example: "admin"
  *     responses:
@@ -176,7 +204,10 @@ router.patch("/:teamId/datasets", authorize, checkTeamPermission("admin"), teamC
  *           application/json:
  *             example:
  *               message: "Team permissions updated successfully"
- *               body: {}
+ *               body:
+ *                 id: "teamId123"
+ *                 name: "Development Team"
+ *                 memberPermission: "admin"
  *               status: 200
  */
 // endpoint to update team permission

@@ -8,33 +8,49 @@ const router = Router();
  * @swagger
  * /notifications:
  *   get:
- *     summary: Get notifications with pagination
+ *     summary: Retrieve a paginated list of notifications for the authenticated user
  *     tags: [Notifications]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         description: Number of notifications per page
  *     responses:
  *       200:
  *         description: Successfully retrieved notifications
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully retrieved notifications"
+ *               message: "Notifications fetched successfully"
  *               body:
  *                 notifications:
  *                   - id: "1"
  *                     message: "New comment on your post"
+ *                     read: false
+ *                     createdAt: "2023-03-01T12:00:00Z"
  *                   - id: "2"
  *                     message: "Your profile was updated"
+ *                     read: true
+ *                     createdAt: "2023-02-28T15:30:00Z"
  *               status: 200
  */
-// Endpoint to get notifications by pagination
 router.get("/", authorize, notificationController.getNotificationsByPagination);
 
 /**
  * @swagger
  * /notifications/unread/count:
  *   get:
- *     summary: Get unread notification count
+ *     summary: Retrieve the count of unread notifications for the authenticated user
  *     tags: [Notifications]
  *     security:
  *       - bearerAuth: []
@@ -44,20 +60,21 @@ router.get("/", authorize, notificationController.getNotificationsByPagination);
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully retrieved unread notification count"
+ *               message: "Unread notification count fetched successfully"
  *               body:
- *                 unreadCount: 5
+ *                 count: 5
  *               status: 200
  */
-// Endpoint to get unread notification count
 router.get("/unread/count", authorize, notificationController.getUnreadNotificationCount);
 
 /**
  * @swagger
  * /notifications:
  *   post:
- *     summary: Add a new notification
+ *     summary: Create a new notification for the authenticated user
  *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -70,77 +87,82 @@ router.get("/unread/count", authorize, notificationController.getUnreadNotificat
  *                 example: "You have a new follower"
  *     responses:
  *       201:
- *         description: Successfully added notification
+ *         description: Successfully created notification
  *         content:
  *           application/json:
  *             example:
- *               message: "Notification added successfully"
+ *               message: "Notification created successfully"
  *               body:
  *                 id: "12345"
  *                 message: "You have a new follower"
+ *                 read: false
+ *                 createdAt: "2023-03-01T12:00:00Z"
  *               status: 201
  */
-// Endpoint to add notification
 router.post("/", authorize, notificationController.createNotification);
 
 /**
  * @swagger
  * /notifications/{notificationId}/read:
  *   put:
- *     summary: Mark a notification as read
+ *     summary: Mark a specific notification as read
  *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: notificationId
  *         required: true
  *         schema:
  *           type: string
- *         description: Notification ID
+ *         description: The ID of the notification to mark as read
  *     responses:
  *       200:
  *         description: Successfully marked notification as read
  *         content:
  *           application/json:
  *             example:
- *               message: "Notification marked as read"
+ *               message: "Notification marked as read successfully"
  *               body: {}
  *               status: 200
  */
-// Endpoint to mark notification as read
 router.put("/:notificationId/read", authorize, notificationController.markNotificationAsRead);
 
 /**
  * @swagger
  * /notifications/read:
  *   put:
- *     summary: Mark all notifications as read
+ *     summary: Mark all notifications as read for the authenticated user
  *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successfully marked all notifications as read
  *         content:
  *           application/json:
  *             example:
- *               message: "All notifications marked as read"
+ *               message: "All notifications marked as read successfully"
  *               body: {}
  *               status: 200
  */
-// Endpoint to mark all notifications as read
 router.put("/read", authorize, notificationController.markAllNotificationsAsRead);
 
 /**
  * @swagger
  * /notifications/{notificationId}:
  *   delete:
- *     summary: Delete a notification by ID
+ *     summary: Delete a specific notification by ID
  *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: notificationId
  *         required: true
  *         schema:
  *           type: string
- *         description: Notification ID
+ *         description: The ID of the notification to delete
  *     responses:
  *       200:
  *         description: Successfully deleted notification
@@ -151,15 +173,16 @@ router.put("/read", authorize, notificationController.markAllNotificationsAsRead
  *               body: {}
  *               status: 200
  */
-// Endpoint to delete notification
 router.delete("/:notificationId", authorize, notificationController.deleteNotification);
 
 /**
  * @swagger
  * /notifications:
  *   delete:
- *     summary: Delete all notifications
+ *     summary: Delete all notifications for the authenticated user
  *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Successfully deleted all notifications
@@ -170,7 +193,6 @@ router.delete("/:notificationId", authorize, notificationController.deleteNotifi
  *               body: {}
  *               status: 200
  */
-// Endpoint to delete all notifications
 router.delete("/", authorize, notificationController.deleteAllNotifications);
 
 export default router;

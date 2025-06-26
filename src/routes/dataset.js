@@ -15,7 +15,7 @@ const router = Router();
  *     tags: [Datasets]
  *     responses:
  *       200:
- *         description: Successfully retrieved cleaned datasets count
+ *         description: Successfully retrieved the count of cleaned datasets
  *         content:
  *           application/json:
  *             example:
@@ -34,7 +34,7 @@ router.get("/cleaned-datasets-count", authorizeAdmin, datasetController.getNumbe
  *     tags: [Datasets]
  *     responses:
  *       200:
- *         description: Successfully retrieved generated dashboards count
+ *         description: Successfully retrieved the count of generated dashboards
  *         content:
  *           application/json:
  *             example:
@@ -49,11 +49,11 @@ router.get("/generated_dashboards_no", authorizeAdmin, datasetController.getNumb
  * @swagger
  * /datasets/domains-count:
  *   get:
- *     summary: Get the count of domains
+ *     summary: Get the count of available domains
  *     tags: [Datasets]
  *     responses:
  *       200:
- *         description: Successfully retrieved domains count
+ *         description: Successfully retrieved the count of domains
  *         content:
  *           application/json:
  *             example:
@@ -68,7 +68,7 @@ router.get("/domains-count", authorizeAdmin, datasetController.getNumberOfDomain
  * @swagger
  * /datasets/choose-domain:
  *   post:
- *     summary: Select a domain for a dataset
+ *     summary: Select a domain for the dataset
  *     tags: [Datasets]
  *     requestBody:
  *       required: true
@@ -77,18 +77,20 @@ router.get("/domains-count", authorizeAdmin, datasetController.getNumberOfDomain
  *           schema:
  *             type: object
  *             properties:
- *               domain:
+ *               domainType:
  *                 type: string
- *                 example: "Finance"
+ *                 example: "ecommerce"
  *     responses:
  *       200:
- *         description: Successfully selected domain
+ *         description: Successfully selected a domain
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully selected domain"
+ *               message: "ecommerce domain selected successfully"
  *               body:
- *                 domain: "Finance"
+ *                 domainType: "ecommerce"
+ *                 nextStep: "/upload"
+ *                 sessionId: "abc123"
  *               status: 200
  */
 router.post("/choose-domain", authorize, datasetController.selectDomain);
@@ -97,7 +99,7 @@ router.post("/choose-domain", authorize, datasetController.selectDomain);
  * @swagger
  * /datasets/upload:
  *   post:
- *     summary: Upload a dataset
+ *     summary: Upload a dataset file
  *     tags: [Datasets]
  *     requestBody:
  *       required: true
@@ -110,15 +112,16 @@ router.post("/choose-domain", authorize, datasetController.selectDomain);
  *                 type: string
  *                 format: binary
  *     responses:
- *       201:
- *         description: Dataset uploaded successfully
+ *       200:
+ *         description: Dataset file uploaded successfully
  *         content:
  *           application/json:
  *             example:
- *               message: "Dataset uploaded successfully"
+ *               message: "File uploaded successfully"
  *               body:
- *                 url: "https://example.com/dataset.csv"
- *               status: 201
+ *                 fileUrl: "https://example.com/dataset.csv"
+ *                 nextStep: "/processing-options"
+ *               status: 200
  */
 router.post("/upload", authorize, uploadFile, datasetController.storeFile);
 
@@ -126,7 +129,7 @@ router.post("/upload", authorize, uploadFile, datasetController.storeFile);
  * @swagger
  * /datasets/processing-options:
  *   post:
- *     summary: Select processing options for a dataset
+ *     summary: Select processing options for the dataset
  *     tags: [Datasets]
  *     requestBody:
  *       required: true
@@ -135,20 +138,22 @@ router.post("/upload", authorize, uploadFile, datasetController.storeFile);
  *           schema:
  *             type: object
  *             properties:
- *               options:
- *                 type: array
- *                 items:
- *                   type: string
- *                 example: ["Remove duplicates", "Normalize data"]
+ *               analysis_option:
+ *                 type: string
+ *                 enum: ["clean_only", "clean_and_generate"]
+ *                 example: "clean_and_generate"
+ *               downloadAfterCreating:
+ *                 type: boolean
+ *                 example: true
  *     responses:
  *       200:
  *         description: Successfully selected processing options
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully selected processing options"
+ *               message: "Processing options saved"
  *               body:
- *                 options: ["Remove duplicates", "Normalize data"]
+ *                 nextStep: "/grant-access"
  *               status: 200
  */
 router.post("/processing-options", authorize, datasetController.selectOptions);
@@ -157,7 +162,7 @@ router.post("/processing-options", authorize, datasetController.selectOptions);
  * @swagger
  * /datasets/grant-access:
  *   post:
- *     summary: Grant access to a dataset
+ *     summary: Grant access permissions to users for the dataset
  *     tags: [Datasets]
  *     requestBody:
  *       required: true
@@ -166,18 +171,29 @@ router.post("/processing-options", authorize, datasetController.selectOptions);
  *           schema:
  *             type: object
  *             properties:
- *               userId:
- *                 type: string
- *                 example: "12345"
+ *               userPermissions:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     userId:
+ *                       type: string
+ *                       example: "12345"
+ *                     permission:
+ *                       type: string
+ *                       enum: ["view", "edit", "admin"]
+ *                       example: "view"
  *     responses:
  *       200:
- *         description: Successfully granted access
+ *         description: Successfully granted access permissions
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully granted access"
+ *               message: "Access permissions saved successfully"
  *               body:
- *                 userId: "12345"
+ *                 accessGranted: true
+ *                 usersCount: 2
+ *                 nextStep: "/generate-insights"
  *               status: 200
  */
 router.post("/grant-access", authorize, datasetController.grantUserAccess);
@@ -186,7 +202,7 @@ router.post("/grant-access", authorize, datasetController.grantUserAccess);
  * @swagger
  * /datasets/generate-insights:
  *   post:
- *     summary: Generate insights for a dataset
+ *     summary: Generate insights for the dataset
  *     tags: [Datasets]
  *     requestBody:
  *       required: true
@@ -199,60 +215,45 @@ router.post("/grant-access", authorize, datasetController.grantUserAccess);
  *                 type: string
  *                 example: "67890"
  *     responses:
- *       200:
+ *       201:
  *         description: Successfully generated insights
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully generated insights"
+ *               message: "Dataset analyzed successfully"
  *               body:
+ *                 datasetId: "67890"
  *                 insights: ["Insight 1", "Insight 2"]
- *               status: 200
+ *               status: 201
  */
 router.post("/generate-insights", authorize, datasetController.generateInsights);
 
 /**
  * @swagger
- * /datasets/clean-dataset:
- *   post:
- *     summary: Clean a dataset
- *     tags: [Datasets]
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               file:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Successfully cleaned dataset
- *         content:
- *           application/json:
- *             example:
- *               message: "Successfully cleaned dataset"
- *               body:
- *                 url: "https://example.com/cleaned-dataset.csv"
- *               status: 200
- */
-router.post("/clean-dataset", authorize, uploadFile, datasetController.cleanData);
-
-/**
- * @swagger
  * /datasets:
  *   get:
- *     summary: Get all datasets
+ *     summary: Retrieve all datasets for the user
  *     tags: [Datasets]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *         description: Number of datasets to retrieve per page
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: Page number
  *     responses:
  *       200:
  *         description: Successfully retrieved datasets
  *         content:
  *           application/json:
  *             example:
- *               message: "Successfully retrieved datasets"
+ *               message: "Datasets read successfully"
  *               body:
  *                 datasets: [{ id: "1", name: "Dataset 1" }, { id: "2", name: "Dataset 2" }]
  *               status: 200
