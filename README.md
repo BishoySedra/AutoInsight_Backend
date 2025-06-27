@@ -1,6 +1,6 @@
 # AutoInsight Backend
 
-Frontend GitHub Repo: https://github.com/BishoySedra/AutoInsight_Frontend
+Frontend GitHub Repo: 👉 https://github.com/BishoySedra/AutoInsight_Frontend
 
 AutoInsight is a backend for a full-stack data analysis platform.  
 It allows users to upload CSV files, clean their data, generate insights, and manage team collaboration.  
