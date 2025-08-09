@@ -10,4 +10,5 @@ const isProd = nodeEnv === "production";
 app.listen(PORT, () => {
   console.log(`🚀 Server is running in ${nodeEnv} mode at ${protocol}://${isProd ? appUrl : `localhost:${PORT}`}${baseUrl}`);
   console.log(`📄 Swagger is available at ${protocol}://${isProd ? appUrl : `localhost:${PORT}`}/docs`);
+  console.log(`🔗 API Base URL: ${protocol}://${isProd ? appUrl : `localhost:${PORT}`}${baseUrl}`);
 });
