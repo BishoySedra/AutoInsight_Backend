@@ -1,0 +1,7 @@
+FROM bishoysedra/autoinsight-api
+
+# Expose the port your app runs on (adjust if different)
+EXPOSE 3000
+
+# Start the application
+CMD ["node", "index.js"]
