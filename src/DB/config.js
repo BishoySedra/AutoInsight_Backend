@@ -8,7 +8,7 @@ let isConnected = false; // Singleton State
 const connectDB = async () => {
   if (isConnected) {
     console.log("✅ MongoDB already connected. Reusing existing connection.");
-    return;
+    return mongoose.connection;
   }
 
   try {
@@ -41,6 +41,7 @@ const connectDB = async () => {
     );
 
     isConnected = true;
+    return mongoose.connection;
   } catch (error) {
     console.error("❌ Error connecting to MongoDB:", error.message);
     process.exit(1); // Exit app if DB connection fails
