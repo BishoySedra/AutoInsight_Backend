@@ -4,19 +4,17 @@ import connectDB from "./src/DB/config.js";
 const startServer = async () => {
   try {
     await connectDB();
+
     const PORT = process.env.PORT || 5000;
-    const baseUrl = process.env.BASE_URL || '/api/v1';
-    const app_url = process.env.APP_URL || `localhost`;
-    const protocol = process.env.PROTOCOL || 'http';
-    const nodeEnv = process.env.NODE_ENV || 'development';
+    const baseUrl = process.env.BASE_URL || "/api/v1";
+    const appUrl = process.env.APP_URL || "localhost";
+    const protocol = process.env.PROTOCOL || "http";
+    const nodeEnv = process.env.NODE_ENV || "development";
+    const isProd = nodeEnv === "production";
+
     app.listen(PORT, () => {
-      if (nodeEnv !== 'production') {
-        console.log(`🚀 Server is running in development mode at ${protocol}://localhost:${PORT}${baseUrl}`);
-        console.log(`Swagger is available at ${protocol}://localhost:${PORT}/docs`);
-      } else {
-        console.log(`🚀 Server is running in production mode at ${protocol}://${app_url}${baseUrl}`);
-        console.log(`Swagger is available at ${protocol}://${app_url}/docs`);
-      }
+      console.log(`🚀 Server is running in ${nodeEnv} mode at ${protocol}://${isProd ? appUrl : `localhost:${PORT}`}${baseUrl}`);
+      console.log(`📄 Swagger is available at ${protocol}://${isProd ? appUrl : `localhost:${PORT}`}/docs`);
     });
   } catch (error) {
     console.error("❌ Server startup failed:", error);
