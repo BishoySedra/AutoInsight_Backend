@@ -4,15 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'Dockerfile.build'
-      - 'src/**'
-      - '.github/workflows/deploy.yml'
-      - '**.js'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'README.md'
-      - '.dockerignore'
 
 jobs:
   deploy:
